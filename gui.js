@@ -4054,6 +4054,10 @@ IDE_Morph.prototype.getURLsbeOrRelative = function (url) {
         } else {
             console.log('uh oh');
             console.log(request.status);
+            console.log(request.responseText);
+            if (response.responseText) {
+                return response.responseText;
+            }
         }
         // return myself.getURL(url);
     } catch (err) {
