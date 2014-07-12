@@ -2350,7 +2350,7 @@ IDE_Morph.prototype.projectMenu = function () {
         function () {
             myself.droppedText(
                 myself.getURLsbeOrRelative(
-                    'tools.xml'
+                    './tools.xml'
                 ),
                 'tools'
             );
@@ -4036,19 +4036,49 @@ IDE_Morph.prototype.getURL = function (url) {
 };
 
 IDE_Morph.prototype.getURLsbeOrRelative = function (url) {
-    var request = new XMLHttpRequest(),
-        myself = this;
+    request = new XMLHttpRequest()
+    var myself = this;
     try {
-        request.open('GET', 'http://snap.berkeley.edu/snapsource/' +
-                                           url, false);
+        console.log('FUNCTION URL: ' + url);
+        request.open('GET', url, false);
+        console.log('REQUEST');
+        console.log(request);
+        console.log('URL');
+        console.log(request.responseURL);
         request.send();
+        console.log('sent');
+        console.log(request);
         if (request.status === 200) {
+            console.log('Success!');
             return request.responseText;
+        } else {
+            console.log('uh oh');
+            console.log(request.status);
         }
-        return myself.getURL(url);
+        // return myself.getURL(url);
     } catch (err) {
-        myself.showMessage(err);
-        return;
+        console.log('ERROR');
+        console.log(err);
+        check = url.indexOf('snap.berkeley.edu') === -1
+        console.log('Check: ' + check);
+        console.log(typeof url);
+        console.log(url);
+        // console.log(err);
+        if (check) {
+            console.log('URL...');
+            try {
+                console.log('try again');
+                return myself.getURLsbeOrRelative('http://snap.berkeley.edu/snapsource/' + url);
+                console.log('success finally');
+            } catch (err) {
+                console.log('2nd try failed');
+                console.log(err);
+            }
+        } else {
+            console.log('wat');
+        }
+        // myself.showMessage(err);
+        // return;
     }
 };
 
