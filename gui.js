@@ -82,6 +82,10 @@ var WardrobeMorph;
 var SoundIconMorph;
 var JukeboxMorph;
 
+// The main location for Snap!'s code
+// Note the http: is explictly missing to support both http and https
+var SNAP_SOURCE = '//snap.berkeley.edu/snapsource/';
+
 // IDE_Morph ///////////////////////////////////////////////////////////
 
 // I am SNAP's top-level frame, the Editor window
