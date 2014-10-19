@@ -69,7 +69,7 @@ SpeechBubbleMorph*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.gui = '2014-October-06';
+modules.gui = '2014-October-19';
 
 // Declarations
 
@@ -2281,7 +2281,9 @@ IDE_Morph.prototype.projectMenu = function () {
         pos = this.controlBar.projectButton.bottomLeft(),
         graphicsName = this.currentSprite instanceof SpriteMorph ?
                 'Costumes' : 'Backgrounds',
-        shiftClicked = (world.currentKey === 16);
+        shiftClicked = (world.currentKey === 16),
+        // Check for upport for the HTML5 download attribute
+        downloadExists = 'download' in document.createElement('a');;
 
     menu = new MenuMorph(this);
     menu.addItem('Project notes...', 'editProjectNotes');
@@ -2289,12 +2291,11 @@ IDE_Morph.prototype.projectMenu = function () {
     menu.addItem('New', 'createNewProject');
     menu.addItem('Open...', 'openProjectsBrowser');
     menu.addItem('Save', "save");
-    if (shiftClicked) {
+    if (downloadExists) {
         menu.addItem(
             'Save to disk',
             'saveProjectToDisk',
-            'experimental - store this project\nin your downloads folder',
-            new Color(100, 0, 0)
+            'store this project\nin your downloads folder'
         );
     }
     menu.addItem('Save As...', 'saveProjectsBrowser');
@@ -2333,21 +2334,23 @@ IDE_Morph.prototype.projectMenu = function () {
         'file menu import hint' // looks up the actual text in the translator
     );
 
-    menu.addItem(
-        shiftClicked ?
-                'Export project as plain text...' : 'Export project...',
-        function () {
-            if (myself.projectName) {
-                myself.exportProject(myself.projectName, shiftClicked);
-            } else {
-                myself.prompt('Export Project As...', function (name) {
-                    myself.exportProject(name);
-                }, null, 'exportProject');
-            }
-        },
-        'show project data as XML\nin a new browser window',
-        shiftClicked ? new Color(100, 0, 0) : null
-    );
+    if (!downloadExists) {
+        menu.addItem(
+            shiftClicked ?
+                    'Export project as plain text...' : 'Export project...',
+            function () {
+                if (myself.projectName) {
+                    myself.exportProject(myself.projectName, shiftClicked);
+                } else {
+                    myself.prompt('Export Project As...', function (name) {
+                        myself.exportProject(name);
+                    }, null, 'exportProject');
+                }
+            },
+            'show project data as XML\nin a new browser window',
+            shiftClicked ? new Color(100, 0, 0) : null
+        );
+    }
 
     menu.addItem(
         'Export blocks...',
