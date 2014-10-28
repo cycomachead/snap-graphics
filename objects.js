@@ -125,7 +125,7 @@ PrototypeHatBlockMorph*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.objects = '2014-July-30';
+modules.objects = '2014-October-08';
 
 var SpriteMorph;
 var StageMorph;
@@ -3457,6 +3457,7 @@ SpriteMorph.prototype.allMessageNames = function () {
 };
 
 SpriteMorph.prototype.allHatBlocksFor = function (message) {
+    if (typeof message === 'number') {message = message.toString(); }
     return this.scripts.children.filter(function (morph) {
         var event;
         if (morph.selector) {
@@ -4381,17 +4382,33 @@ StageMorph.prototype.drawOn = function (aCanvas, aRect) {
         hs = h / this.scale;
         context.save();
         context.scale(this.scale, this.scale);
-        context.drawImage(
-            this.penTrails(),
-            src.left() / this.scale,
-            src.top() / this.scale,
-            ws,
-            hs,
-            area.left() / this.scale,
-            area.top() / this.scale,
-            ws,
-            hs
-        );
+        try {
+            context.drawImage(
+                this.penTrails(),
+                src.left() / this.scale,
+                src.top() / this.scale,
+                ws,
+                hs,
+                area.left() / this.scale,
+                area.top() / this.scale,
+                ws,
+                hs
+            );
+        } catch (err) { // sometimes triggered only by Firefox
+            // console.log(err);
+            context.restore();
+            context.drawImage(
+                this.penTrails(),
+                0,
+                0,
+                this.dimensions.x,
+                this.dimensions.y,
+                this.left(),
+                this.top(),
+                this.dimensions.x * this.scale,
+                this.dimensions.y * this.scale
+            );
+        }
         context.restore();
     }
 };
@@ -4674,6 +4691,7 @@ StageMorph.prototype.fireKeyEvent = function (key) {
     var evt = key.toLowerCase(),
         hats = [],
         procs = [],
+        ide = this.parentThatIsA(IDE_Morph),
         myself = this;
 
     this.keysPressed[evt] = true;
@@ -4681,19 +4699,24 @@ StageMorph.prototype.fireKeyEvent = function (key) {
         return this.fireGreenFlagEvent();
     }
     if (evt === 'ctrl f') {
-        return this.parentThatIsA(IDE_Morph).currentSprite.searchBlocks();
+        if (!ide.isAppMode) {ide.currentSprite.searchBlocks(); }
+        return;
     }
     if (evt === 'ctrl n') {
-        return this.parentThatIsA(IDE_Morph).createNewProject();
+        if (!ide.isAppMode) {ide.createNewProject(); }
+        return;
     }
     if (evt === 'ctrl o') {
-        return this.parentThatIsA(IDE_Morph).openProjectsBrowser();
+        if (!ide.isAppMode) {ide.openProjectsBrowser(); }
+        return;
     }
     if (evt === 'ctrl s') {
-        return this.parentThatIsA(IDE_Morph).save();
+        if (!ide.isAppMode) {ide.save(); }
+        return;
     }
     if (evt === 'ctrl shift s') {
-        return this.parentThatIsA(IDE_Morph).saveProjectsBrowser();
+        if (!ide.isAppMode) {return ide.saveProjectsBrowser(); }
+        return;
     }
     if (evt === 'esc') {
         return this.fireStopAllEvent();
@@ -6407,10 +6430,14 @@ CellMorph.prototype.drawNew = function () {
             }
             this.contentsMorph.setColor(new Color(255, 255, 255));
         } else if (typeof this.contents === 'boolean') {
-            this.contentsMorph = SpriteMorph.prototype.booleanMorph.call(
+            img = SpriteMorph.prototype.booleanMorph.call(
                 null,
                 this.contents
-            );
+            ).fullImage();
+            this.contentsMorph = new Morph();
+            this.contentsMorph.silentSetWidth(img.width);
+            this.contentsMorph.silentSetHeight(img.height);
+            this.contentsMorph.image = img;
         } else if (this.contents instanceof HTMLCanvasElement) {
             this.contentsMorph = new Morph();
             this.contentsMorph.silentSetWidth(this.contents.width);
@@ -6735,7 +6762,8 @@ WatcherMorph.prototype.update = function () {
     if (this.target && this.getter) {
         this.updateLabel();
         if (this.target instanceof VariableFrame) {
-            newValue = this.target.vars[this.getter];
+            newValue = this.target.vars[this.getter] ?
+                    this.target.vars[this.getter].value : undefined;
         } else {
             newValue = this.target[this.getter]();
         }
@@ -6820,7 +6848,7 @@ WatcherMorph.prototype.fixLayout = function () {
         this.sliderMorph.button.pressColor.b += 100;
         this.sliderMorph.setHeight(fontSize);
         this.sliderMorph.action = function (num) {
-            myself.target.vars[myself.getter] = Math.round(num);
+            myself.target.vars[myself.getter].value = Math.round(num);
         };
         this.add(this.sliderMorph);
     }
