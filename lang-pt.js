@@ -185,7 +185,7 @@ SnapTranslator.dict.pt = {
     'translator_e-mail':
         'mmsequeira@gmail.com',
     'last_changed':
-        '2014-05-26',
+        '2014-10-01',
 
     // GUI
     // control bar:
@@ -672,7 +672,7 @@ SnapTranslator.dict.pt = {
     'Libraries...':
         'Bibliotecas...',
     'Import library':
-        'Biblioteca a importar',
+        'Importar biblioteca',
 
     // menu da nuvem
     'Login...':
@@ -835,6 +835,8 @@ SnapTranslator.dict.pt = {
     // actores:
     'edit':
         'editar',
+    'move':
+        'mover',
     'detach from':
         'soltar de',
     'detach all parts':
@@ -941,7 +943,7 @@ SnapTranslator.dict.pt = {
     'Delete Project':
         'Remover Projecto',
     'Are you sure you want to delete':
-        'Quer mesmo remover?',
+        'Quer mesmo remover',
     'rename...':
         'alterar o nome…',
 
@@ -1246,6 +1248,8 @@ SnapTranslator.dict.pt = {
         'a exponencial',
 
     // delimitadores
+    'letter':
+        'letra',
     'whitespace':
         'espaços em branco',
     'line':
@@ -1426,10 +1430,10 @@ SnapTranslator.dict.pt = {
         'Actualizando a\nlista de projectos…',
     'Opening project...':
         'Abrindo o projecto…',
-    'Fetching project from the cloud...':
-        'Obtendo o projecto da nuvem…',
-    'Saving project to the cloud...':
-        'Guardando o projecto na nuvem…',
+    'Fetching project\nfrom the cloud...':
+        'Obtendo o projecto\nda nuvem…',
+    'Saving project\nto the cloud...':
+        'Guardando o projecto\nna nuvem…',
     'Sprite Nesting':
         'Actores compostos',
     'uncheck to disable\nsprite composition':
@@ -1581,5 +1585,99 @@ SnapTranslator.dict.pt = {
     'arrowRightOutline':
         'contorno de seta para a direita',
     'robot':
-        'robot'
+        'robot',
+    'turn pen trails into new costume...':
+        'transformar traços da caneta em novo traje…',
+    'turn all pen trails and stamps\ninto a new costume for the\ncurrently selected sprite':
+        'Transforma todos os traços da caneta\ne carimbagens num novo traje\n'
+            + 'do actor seleccionado neste momento',
+    'pen':
+        'caneta',
+    'tip':
+        'ponta',
+    'middle':
+        'meio',
+    'last changed':
+        'alterado pela última vez em',
+    'Are you sure you want to publish':
+        'Quer mesmo publicar',
+    'Are you sure you want to unpublish':
+        'Quer mesmo deixar de publicar',
+    'Share Project':
+        'Partilhar Projecto',
+    'Unshare Project':
+        'Deixar de Partilhar Projecto',
+    'sharing\nproject...':
+        'partilhando\nprojecto…',
+    'unsharing\nproject...':
+        'deixando de partilhar\nprojecto…',
+    'shared.':
+        'partilhado.',
+    'unshared.':
+        'deixado de partilhar.',
+    'Unshare':
+        'Deixar de Partilhar',
+    'password has been changed.':
+        'a sua palavra-passe foi alterada.',
+    'SVG costumes are\nnot yet fully supported\nin every browser':
+        'trajes SVG ainda não\nsão totalmente suportados\nem todos os navegadores',
+    'Save Project':
+        'Guardar Projecto',
+    'script pic with result...':
+        'fotografia do guião incluindo resultado…',
+    'open a new window\nwith a picture of both\nthis script and its result':
+        'Abrir uma nova janela com\numa fotografia tanto deste guião\ncomo do seu resultado.',
+    'JavaScript function ( %mult%s ) { %code }':
+        'função JavaScript ( %mult%s ) { %code }',
+    'Select categories of additional blocks to add to this project.':
+        'Seleccionar categorias de blocos adicionais a acrescentar a este projecto.',
+    'Import sound':
+        'Importar som',
+    'Select a sound from the media library':
+        'Seleccionar um som da biblioteca de média.',
+    'Import':
+        'Importar',
+    'Select a costume from the media library':
+        'Seleccionar um traje da biblioteca de média.',
+    'edit rotation point only...':
+        'editar apenas ponto de rotação…',
+
+    // produção de código
+    'map %cmdRing to %codeKind %code':
+        'mapear %cmdRing no %codeKind %code',
+    'map String to code %code':
+        'mapear texto no código %code',
+    'map %codeListPart of %codeListKind to code %code':
+        'mapear %codeListPart de %codeListKind no código %code',
+    'code of %cmdRing':
+        'o código de %cmdRing',
+    'delimiter':
+        'delimitador',
+    'collection':
+        'colecção',
+    'variables':
+        'variáveis',
+    'parameters':
+        'parâmetros',
+    'code':
+        'código',
+    'header':
+        'cabeçalho',
+    'header mapping...':
+        'mapeamento para cabeçalho…',
+    'code mapping...':
+        'mapeamento para código…',
+    'Code mapping':
+        'Mapeamento para código',
+    'Header mapping':
+        'Mapeamento para cabeçalho',
+    'Enter code that corresponds to the block\'s definition. Use the formal parameter\nnames as shown and <body> to reference the definition body\'s generated text code.':
+        'Introduza o código correspondente à definição do bloco. Use os nomes dos parâmetros\n'
+            + 'tal como mostrados e use <body> para referenciar o código gerado da definição do corpo',
+    'Enter code that corresponds to the block\'s definition. Choose your own\nformal parameter names (ignoring the ones shown).':
+        'Introduza o código correspondente à definição do bloco. Escolha os seus próprios\n'
+            + 'nomes para os parâmetros (ignorando os nomes mostrados).',
+    'Enter code that corresponds to the block\'s operation (usually a single\nfunction invocation). Use <#n> to reference actual arguments as shown.':
+        'Introduza o código que corresponda à operação do bloco (normalmente uma simples\n'
+            + 'invocação de rotina). Use <#n> para referenciar os argumentos tal como mostrado'
 };

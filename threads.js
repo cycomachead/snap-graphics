@@ -40,8 +40,8 @@
         ThreadManager
         Process
         Context
+        Variable
         VariableFrame
-        UpvarReference
 
 
     credits
@@ -83,13 +83,12 @@ ArgLabelMorph, localize, XML_Element, hex_sha512*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.threads = '2014-July-11';
+modules.threads = '2014-October-01';
 
 var ThreadManager;
 var Process;
 var Context;
 var VariableFrame;
-var UpvarReference;
 
 function snapEquals(a, b) {
     if (a instanceof List || (b instanceof List)) {
@@ -134,7 +133,11 @@ ThreadManager.prototype.toggleProcess = function (block) {
     }
 };
 
-ThreadManager.prototype.startProcess = function (block, isThreadSafe) {
+ThreadManager.prototype.startProcess = function (
+    block,
+    isThreadSafe,
+    exportResult
+) {
     var active = this.findProcess(block),
         top = block.topBlock(),
         newProc;
@@ -147,6 +150,7 @@ ThreadManager.prototype.startProcess = function (block, isThreadSafe) {
     }
     top.addHighlight();
     newProc = new Process(block.topBlock());
+    newProc.exportResult = exportResult;
     this.processes.push(newProc);
     return newProc;
 };
@@ -232,11 +236,17 @@ ThreadManager.prototype.removeTerminatedProcesses = function () {
 
             if (proc.topBlock instanceof ReporterBlockMorph) {
                 if (proc.homeContext.inputs[0] instanceof List) {
-                    proc.topBlock.showBubble(new ListWatcherMorph(
-                        proc.homeContext.inputs[0]
-                    ));
+                    proc.topBlock.showBubble(
+                        new ListWatcherMorph(
+                            proc.homeContext.inputs[0]
+                        ),
+                        proc.exportResult
+                    );
                 } else {
-                    proc.topBlock.showBubble(proc.homeContext.inputs[0]);
+                    proc.topBlock.showBubble(
+                        proc.homeContext.inputs[0],
+                        proc.exportResult
+                    );
                 }
             }
         } else {
@@ -302,6 +312,8 @@ ThreadManager.prototype.findProcess = function (block) {
     httpRequest         active instance of an HttpRequest or null
     pauseOffset         msecs between the start of an interpolated operation
                         and when the process was paused
+    exportResult        boolean flag indicating whether a picture of the top
+                        block along with the result bubble shoud be exported
 */
 
 Process.prototype = {};
@@ -325,6 +337,7 @@ function Process(topBlock) {
     this.isPaused = false;
     this.pauseOffset = null;
     this.frameCount = 0;
+    this.exportResult = false;
 
     if (topBlock) {
         this.homeContext.receiver = topBlock.receiver();
@@ -586,8 +599,7 @@ Process.prototype.evaluateSequence = function (arr) {
         outer = this.context.outerContext,
         isLambda = this.context.isLambda,
         isImplicitLambda = this.context.isImplicitLambda,
-        isCustomBlock = this.context.isCustomBlock,
-        upvars = this.context.upvars;
+        isCustomBlock = this.context.isCustomBlock;
     if (pc === (arr.length - 1)) { // tail call elimination
         this.context = new Context(
             this.context.parentContext,
@@ -598,9 +610,6 @@ Process.prototype.evaluateSequence = function (arr) {
         this.context.isLambda = isLambda;
         this.context.isImplicitLambda = isImplicitLambda;
         this.context.isCustomBlock = isCustomBlock;
-        if (upvars) {
-            this.context.upvars = new UpvarReference(upvars);
-        }
     } else {
         if (pc >= arr.length) {
             this.popContext();
@@ -741,6 +750,13 @@ Process.prototype.reifyPredicate = function (topBlock, parameterNames) {
     return this.reify(topBlock, parameterNames);
 };
 
+Process.prototype.reportJSFunction = function (parmNames, body) {
+    return Function.apply(
+        null,
+        parmNames.asArray().concat([body])
+    );
+};
+
 Process.prototype.doRun = function (context, args, isCustomBlock) {
     return this.evaluate(context, args, true, isCustomBlock);
 };
@@ -751,6 +767,12 @@ Process.prototype.evaluate = function (
     isCommand
 ) {
     if (!context) {return null; }
+    if (context instanceof Function) {
+        return context.apply(
+            this.blockReceiver(),
+            args.asArray().concat([this])
+        );
+    }
     if (context.isContinuation) {
         return this.runContinuation(context, args);
     }
@@ -832,9 +854,6 @@ Process.prototype.evaluate = function (
                 );
             }
         }
-    }
-    if (this.context.upvars) {
-        runnable.upvars = new UpvarReference(this.context.upvars);
     }
 
     if (runnable.expression instanceof CommandBlockMorph) {
@@ -936,7 +955,9 @@ Process.prototype.doReport = function (value, isCSlot) {
         this.context.pc = this.context.expression.length - 1;
     }
     if (isCSlot) {
-        if (this.context.parentContext.expression instanceof Array) {
+        if (this.context &&
+                this.context.parentContext &&
+                this.context.parentContext.expression instanceof Array) {
             this.popContext();
         }
     }
@@ -999,7 +1020,6 @@ Process.prototype.evaluateCustomBlock = function () {
         extra,
         i,
         value,
-        upvars,
         outer;
 
     if (!context) {return null; }
@@ -1034,24 +1054,12 @@ Process.prototype.evaluateCustomBlock = function () {
             outer.variables.addVar(context.inputs[i], value);
 
             // if the parameter is an upvar,
-            // create an UpvarReference to it
+            // create a reference to the variable it points to
             if (declarations[context.inputs[i]][0] === '%upvar') {
-                if (!upvars) { // lazy initialization
-                    upvars = new UpvarReference(this.context.upvars);
-                }
-                upvars.addReference(
-                    value,
-                    context.inputs[i],
-                    outer.variables
-                );
+                this.context.outerContext.variables.vars[value] =
+                    outer.variables.vars[context.inputs[i]];
             }
         }
-    }
-
-    if (upvars) {
-        runnable.upvars = upvars;
-    } else if (this.context.upvars) {
-        runnable.upvars = new UpvarReference(this.context.upvars);
     }
 
     if (runnable.expression instanceof CommandBlockMorph) {
@@ -1094,11 +1102,8 @@ Process.prototype.doChangeVar = function (varName, value) {
 
 Process.prototype.reportGetVar = function () {
     // assumes a getter block whose blockSpec is a variable name
-    var varName = this.context.expression.blockSpec;
-
     return this.context.variables.getVar(
-        varName,
-        this.context.upvars
+        this.context.expression.blockSpec
     );
 };
 
@@ -1109,6 +1114,7 @@ Process.prototype.doShowVar = function (varName) {
         target,
         label,
         others,
+        isGlobal,
         name = varName;
 
     if (name instanceof Context) {
@@ -1135,7 +1141,11 @@ Process.prototype.doShowVar = function (varName) {
                 return;
             }
             // if no watcher exists, create a new one
-            if (target.owner) {
+            isGlobal = contains(
+                this.homeContext.receiver.variables.parentFrame.names(),
+                varName
+            );
+            if (isGlobal || target.owner) {
                 label = name;
             } else {
                 label = name + ' (temporary)';
@@ -1300,8 +1310,7 @@ Process.prototype.doIf = function () {
         outer = this.context.outerContext, // for tail call elimination
         isLambda = this.context.isLambda,
         isImplicitLambda = this.context.isImplicitLambda,
-        isCustomBlock = this.context.isCustomBlock,
-        upvars = this.context.upvars;
+        isCustomBlock = this.context.isCustomBlock;
 
     this.popContext();
     if (args[0]) {
@@ -1310,7 +1319,6 @@ Process.prototype.doIf = function () {
             this.context.isLambda = isLambda;
             this.context.isImplicitLambda = isImplicitLambda;
             this.context.isCustomBlock = isCustomBlock;
-            this.context.upvars = new UpvarReference(upvars);
         }
     }
     this.pushContext();
@@ -1321,8 +1329,7 @@ Process.prototype.doIfElse = function () {
         outer = this.context.outerContext, // for tail call elimination
         isLambda = this.context.isLambda,
         isImplicitLambda = this.context.isImplicitLambda,
-        isCustomBlock = this.context.isCustomBlock,
-        upvars = this.context.upvars;
+        isCustomBlock = this.context.isCustomBlock;
 
     this.popContext();
     if (args[0]) {
@@ -1340,7 +1347,6 @@ Process.prototype.doIfElse = function () {
         this.context.isLambda = isLambda;
         this.context.isImplicitLambda = isImplicitLambda;
         this.context.isCustomBlock = isCustomBlock;
-        this.context.upvars = new UpvarReference(upvars);
     }
 
     this.pushContext();
@@ -1519,8 +1525,7 @@ Process.prototype.doRepeat = function (counter, body) {
         outer = this.context.outerContext, // for tail call elimination
         isLambda = this.context.isLambda,
         isImplicitLambda = this.context.isImplicitLambda,
-        isCustomBlock = this.context.isCustomBlock,
-        upvars = this.context.upvars;
+        isCustomBlock = this.context.isCustomBlock;
 
     if (counter < 1) { // was '=== 0', which caused infinite loops on non-ints
         return null;
@@ -1532,7 +1537,6 @@ Process.prototype.doRepeat = function (counter, body) {
     this.context.isLambda = isLambda;
     this.context.isImplicitLambda = isImplicitLambda;
     this.context.isCustomBlock = isCustomBlock;
-    this.context.upvars = new UpvarReference(upvars);
 
     this.context.addInput(counter - 1);
 
@@ -2148,6 +2152,9 @@ Process.prototype.reportTextSplit = function (string, delimiter) {
         break;
     case 'whitespace':
         return new List(str.trim().split(/[\t\r\n ]+/));
+    case 'letter':
+        del = '';
+        break;
     default:
         del = (delimiter || '').toString();
     }
@@ -2707,7 +2714,6 @@ Process.prototype.inputOption = function (dta) {
 // Process stack
 
 Process.prototype.pushContext = function (expression, outerContext) {
-    var upvars = this.context ? this.context.upvars : null;
     this.context = new Context(
         this.context,
         expression,
@@ -2716,9 +2722,6 @@ Process.prototype.pushContext = function (expression, outerContext) {
         this.context ? // check needed due to tail call elimination
                 this.context.receiver : this.homeContext.receiver
     );
-    if (upvars) {
-        this.context.upvars = new UpvarReference(upvars);
-    }
 };
 
 Process.prototype.popContext = function () {
@@ -2764,7 +2767,6 @@ Process.prototype.reportFrameCount = function () {
                     null or a String denoting a selector, e.g. 'doYield'
     receiver        the object to which the expression applies, if any
     variables        the current VariableFrame, if any
-    upvars          the current UpvarReference, if any (default: null)
     inputs            an array of input values computed so far
                     (if expression is a    BlockMorph)
     pc                the index of the next block to evaluate
@@ -2794,7 +2796,6 @@ function Context(
         this.variables.parentFrame = this.outerContext.variables;
         this.receiver = this.outerContext.receiver;
     }
-    this.upvars = null; // set to an UpvarReference in custom blocks
     this.inputs = [];
     this.pc = 0;
     this.startTime = null;
@@ -2846,7 +2847,18 @@ Context.prototype.image = function () {
         ring.embed(block, this.isContinuation ? [] : this.inputs);
         return ring.fullImage();
     }
-    return newCanvas();
+
+    // otherwise show an empty ring
+    ring.color = SpriteMorph.prototype.blockColor.other;
+    ring.setSpec('%rc %ringparms');
+
+    // also show my inputs, unless I'm a continuation
+    if (!this.isContinuation) {
+        this.inputs.forEach(function (inp) {
+            ring.parts()[1].addInput(inp);
+        });
+    }
+    return ring.fullImage();
 };
 
 // Context continuations:
@@ -2868,7 +2880,8 @@ Context.prototype.continuation = function () {
 Context.prototype.copyForContinuation = function () {
     var cpy = copy(this),
         cur = cpy,
-        isReporter = !(this.expression instanceof Array);
+        isReporter = !(this.expression instanceof Array ||
+            isString(this.expression));
     if (isReporter) {
         cur.prepareContinuationForBinding();
         while (cur.parentContext) {
@@ -2883,7 +2896,8 @@ Context.prototype.copyForContinuation = function () {
 Context.prototype.copyForContinuationCall = function () {
     var cpy = copy(this),
         cur = cpy,
-        isReporter = !(this.expression instanceof Array);
+        isReporter = !(this.expression instanceof Array ||
+            isString(this.expression));
     if (isReporter) {
         this.expression = this.expression.fullCopy();
         this.inputs = [];
@@ -2934,6 +2948,20 @@ Context.prototype.stackSize = function () {
     return 1 + this.parentContext.stackSize();
 };
 
+// Variable /////////////////////////////////////////////////////////////////
+
+function Variable(value) {
+    this.value = value;
+}
+
+Variable.prototype.toString = function () {
+    return 'a Variable [' + this.value + ']';
+};
+
+Variable.prototype.copy = function () {
+    return new Variable(this.value);
+};
+
 // VariableFrame ///////////////////////////////////////////////////////
 
 function VariableFrame(parentFrame, owner) {
@@ -2947,8 +2975,11 @@ VariableFrame.prototype.toString = function () {
 };
 
 VariableFrame.prototype.copy = function () {
-    var frame = new VariableFrame(this.parentFrame);
-    frame.vars = copy(this.vars);
+    var frame = new VariableFrame(this.parentFrame),
+        myself = this;
+    this.names().forEach(function (vName) {
+        frame.addVar(vName, myself.getVar(vName));
+    });
     return frame;
 };
 
@@ -3001,7 +3032,7 @@ VariableFrame.prototype.setVar = function (name, value) {
 */
     var frame = this.find(name);
     if (frame) {
-        frame.vars[name] = value;
+        frame.vars[name].value = value;
     }
 };
 
@@ -3015,21 +3046,20 @@ VariableFrame.prototype.changeVar = function (name, delta) {
     var frame = this.find(name),
         value;
     if (frame) {
-        value = parseFloat(frame.vars[name]);
+        value = parseFloat(frame.vars[name].value);
         if (isNaN(value)) {
-            frame.vars[name] = delta;
+            frame.vars[name].value = delta;
         } else {
-            frame.vars[name] = value + parseFloat(delta);
+            frame.vars[name].value = value + parseFloat(delta);
         }
     }
 };
 
-VariableFrame.prototype.getVar = function (name, upvars) {
+VariableFrame.prototype.getVar = function (name) {
     var frame = this.silentFind(name),
-        value,
-        upvarReference;
+        value;
     if (frame) {
-        value = frame.vars[name];
+        value = frame.vars[name].value;
         return (value === 0 ? 0
                 : value === false ? false
                         : value === '' ? ''
@@ -3039,12 +3069,6 @@ VariableFrame.prototype.getVar = function (name, upvars) {
         // empty input with a Binding-ID called without an argument
         return '';
     }
-    if (upvars) {
-        upvarReference = upvars.find(name);
-        if (upvarReference) {
-            return upvarReference.getVar(name);
-        }
-    }
     throw new Error(
         'a variable of name \''
             + name
@@ -3053,7 +3077,7 @@ VariableFrame.prototype.getVar = function (name, upvars) {
 };
 
 VariableFrame.prototype.addVar = function (name, value) {
-    this.vars[name] = (value === 0 ? 0
+    this.vars[name] = new Variable(value === 0 ? 0
               : value === false ? false
                        : value === '' ? '' : value || 0);
 };
@@ -3110,67 +3134,3 @@ VariableFrame.prototype.allNames = function () {
     }
     return answer;
 };
-
-// Variable /////////////////////////////////////////////////////////////////
-
-function Variable(value) {
-    this.value = value;
-}
-
-Variable.prototype.toString = function () {
-    return 'a Variable [' + this.value + ']';
-};
-
-Variable.prototype.copy = function () {
-    return new Variable(this.value);
-};
-
-// UpvarReference ///////////////////////////////////////////////////////////
-
-// ... quasi-inherits some features from VariableFrame
-
-function UpvarReference(parent) {
-    this.vars = {}; // structure: {upvarName : [varName, varFrame]}
-    this.parentFrame = parent || null;
-}
-
-UpvarReference.prototype.addReference = function (
-    upvarName,
-    varName,
-    varFrame
-) {
-    this.vars[upvarName] = [varName, varFrame];
-};
-
-UpvarReference.prototype.find = function (name) {
-/*
-    answer the closest upvar reference containing
-    the specified variable, or answer null.
-*/
-    if (this.vars[name] !== undefined) {
-        return this;
-    }
-    if (this.parentFrame) {
-        return this.parentFrame.find(name);
-    }
-    return null;
-};
-
-UpvarReference.prototype.getVar = function (name) {
-    var varName = this.vars[name][0],
-        varFrame = this.vars[name][1],
-        value = varFrame.vars[varName];
-    return (value === 0 ? 0 : value || 0); // don't return null
-};
-
-// UpvarReference tools
-
-UpvarReference.prototype.toString = function () {
-    return 'an UpvarReference {' + this.names() + '}';
-};
-
-// UpvarReference quasi-inheritance from VariableFrame
-
-UpvarReference.prototype.names = VariableFrame.prototype.names;
-UpvarReference.prototype.allNames = VariableFrame.prototype.allNames;
-UpvarReference.prototype.allNamesDict = VariableFrame.prototype.allNamesDict;

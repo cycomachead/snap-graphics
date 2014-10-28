@@ -69,7 +69,7 @@ SpeechBubbleMorph*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.gui = '2014-July-11';
+modules.gui = '2014-October-06';
 
 // Declarations
 
@@ -707,9 +707,11 @@ IDE_Morph.prototype.createControlBar = function () {
             }
         );
 
-        x = myself.right() - (StageMorph.prototype.dimensions.x
-            * (myself.isSmallStage ? myself.stageRatio : 1));
-
+        x = Math.min(
+            startButton.left() - (3 * padding + 2 * stageSizeButton.width()),
+            myself.right() - StageMorph.prototype.dimensions.x *
+                (myself.isSmallStage ? myself.stageRatio : 1)
+        );
         [stageSizeButton, appModeButton].forEach(
             function (button) {
                 x += padding;
@@ -1015,11 +1017,13 @@ IDE_Morph.prototype.createSpriteBar = function () {
     this.spriteBar.add(nameField);
     nameField.drawNew();
     nameField.accept = function () {
-        myself.currentSprite.setName(nameField.getValue());
+        var newName = nameField.getValue();
+        myself.currentSprite.setName(
+            myself.newSpriteName(newName, myself.currentSprite)
+        );
+        nameField.setContents(myself.currentSprite.name);
     };
-    this.spriteBar.reactToEdit = function () {
-        myself.currentSprite.setName(nameField.getValue());
-    };
+    this.spriteBar.reactToEdit = nameField.accept;
 
     // padlock
     padlock = new ToggleMorph(
@@ -1502,7 +1506,9 @@ IDE_Morph.prototype.reactToWorldResize = function (rect) {
 IDE_Morph.prototype.droppedImage = function (aCanvas, name) {
     var costume = new Costume(
         aCanvas,
-        name ? name.split('.')[0] : '' // up to period
+        this.currentSprite.newCostumeName(
+            name ? name.split('.')[0] : '' // up to period
+        )
     );
 
     if (costume.isTainted()) {
@@ -1782,8 +1788,7 @@ IDE_Morph.prototype.addNewSprite = function () {
     var sprite = new SpriteMorph(this.globalVariables),
         rnd = Process.prototype.reportRandom;
 
-    sprite.name = sprite.name
-        + (this.corral.frame.contents.children.length + 1);
+    sprite.name = this.newSpriteName(sprite.name);
     sprite.setCenter(this.stage.center());
     this.stage.add(sprite);
 
@@ -1804,8 +1809,7 @@ IDE_Morph.prototype.paintNewSprite = function () {
         cos = new Costume(),
         myself = this;
 
-    sprite.name = sprite.name +
-        (this.corral.frame.contents.children.length + 1);
+    sprite.name = this.newSpriteName(sprite.name);
     sprite.setCenter(this.stage.center());
     this.stage.add(sprite);
     this.sprites.add(sprite);
@@ -1826,17 +1830,16 @@ IDE_Morph.prototype.paintNewSprite = function () {
 IDE_Morph.prototype.duplicateSprite = function (sprite) {
     var duplicate = sprite.fullCopy();
 
-    duplicate.name = sprite.name + '(2)';
     duplicate.setPosition(this.world().hand.position());
-    this.stage.add(duplicate);
+    duplicate.appearIn(this);
     duplicate.keepWithin(this.stage);
-    this.sprites.add(duplicate);
-    this.corral.addSprite(duplicate);
     this.selectSprite(duplicate);
 };
 
 IDE_Morph.prototype.removeSprite = function (sprite) {
-    var idx = this.sprites.asArray().indexOf(sprite) + 1;
+    var idx, myself = this;
+    sprite.parts.forEach(function (part) {myself.removeSprite(part); });
+    idx = this.sprites.asArray().indexOf(sprite) + 1;
     this.stage.threads.stopAllForReceiver(sprite);
     sprite.destroy();
     this.stage.watchers().forEach(function (watcher) {
@@ -1855,6 +1858,23 @@ IDE_Morph.prototype.removeSprite = function (sprite) {
     ) || this.stage;
 
     this.selectSprite(this.currentSprite);
+};
+
+IDE_Morph.prototype.newSpriteName = function (name, ignoredSprite) {
+    var ix = name.indexOf('('),
+        stem = (ix < 0) ? name : name.substring(0, ix),
+        count = 1,
+        newName = stem,
+        all = this.sprites.asArray().concat(this.stage).filter(
+            function (each) {return each !== ignoredSprite; }
+        ).map(
+            function (each) {return each.name; }
+        );
+    while (contains(all, newName)) {
+        count += 1;
+        newName = stem + '(' + count + ')';
+    }
+    return newName;
 };
 
 // IDE_Morph menus
@@ -2524,7 +2544,9 @@ IDE_Morph.prototype.aboutSnap = function () {
         + '\n\nNathan Dinsmore: Saving/Loading, Snap-Logo Design, '
         + 'countless bugfixes'
         + '\nKartik Chandra: Paint Editor'
-        + '\nYuan Yuan: Graphic Effects'
+        + '\nMichael Ball: Time/Date UI, many bugfixes'
+        + '\n"Ava" Yuan Yuan: Graphic Effects'
+        + '\nKyle Hotchkiss: Block search design'
         + '\nIan Reynolds: UI Design, Event Bindings, '
         + 'Sound primitives'
         + '\nIvan Motyashov: Initial Squeak Porting'
@@ -2836,7 +2858,7 @@ IDE_Morph.prototype.exportGlobalBlocks = function () {
 };
 
 IDE_Morph.prototype.exportSprite = function (sprite) {
-    var str = this.serializer.serialize(sprite);
+    var str = this.serializer.serialize(sprite.allParts());
     window.open('data:text/xml,<sprites app="'
         + this.serializer.app
         + '" version="'
@@ -3310,15 +3332,20 @@ IDE_Morph.prototype.toggleAppMode = function (appMode) {
 
 IDE_Morph.prototype.toggleStageSize = function (isSmall) {
     var myself = this,
-        world = this.world();
+        smallRatio = 0.5,
+        world = this.world(),
+        shiftClicked = (world.currentKey === 16);
+
+    function toggle() {
+        myself.isSmallStage = isNil(isSmall) ? !myself.isSmallStage : isSmall;
+    }
 
     function zoomIn() {
-        myself.stageRatio = 1;
         myself.step = function () {
-            myself.stageRatio -= (myself.stageRatio - 0.5) / 2;
+            myself.stageRatio -= (myself.stageRatio - smallRatio) / 2;
             myself.setExtent(world.extent());
-            if (myself.stageRatio < 0.6) {
-                myself.stageRatio = 0.5;
+            if (myself.stageRatio < (smallRatio + 0.1)) {
+                myself.stageRatio = smallRatio;
                 myself.setExtent(world.extent());
                 delete myself.step;
             }
@@ -3327,11 +3354,11 @@ IDE_Morph.prototype.toggleStageSize = function (isSmall) {
 
     function zoomOut() {
         myself.isSmallStage = true;
-        myself.stageRatio = 0.5;
         myself.step = function () {
             myself.stageRatio += (1 - myself.stageRatio) / 2;
             myself.setExtent(world.extent());
             if (myself.stageRatio > 0.9) {
+                myself.stageRatio = 1;
                 myself.isSmallStage = false;
                 myself.setExtent(world.extent());
                 myself.controlBar.stageSizeButton.refresh();
@@ -3340,7 +3367,15 @@ IDE_Morph.prototype.toggleStageSize = function (isSmall) {
         };
     }
 
-    this.isSmallStage = isNil(isSmall) ? !this.isSmallStage : isSmall;
+    if (shiftClicked) {
+        smallRatio = SpriteIconMorph.prototype.thumbSize.x * 3 /
+            this.stage.dimensions.x;
+        if (!this.isSmallStage || (smallRatio === this.stageRatio)) {
+            toggle();
+        }
+    } else {
+        toggle();
+    }
     if (this.isAnimating) {
         if (this.isSmallStage) {
             zoomIn();
@@ -3348,7 +3383,7 @@ IDE_Morph.prototype.toggleStageSize = function (isSmall) {
             zoomOut();
         }
     } else {
-        if (this.isSmallStage) {this.stageRatio = 0.5; }
+        if (this.isSmallStage) {this.stageRatio = smallRatio; }
         this.setExtent(world.extent());
     }
 };
@@ -5410,6 +5445,7 @@ SpriteIconMorph.prototype.copyStack = function (block) {
 
 SpriteIconMorph.prototype.copyCostume = function (costume) {
     var dup = costume.copy();
+    dup.name = this.object.newCostumeName(dup.name);
     this.object.addCostume(dup);
     this.object.wearCostume(dup);
 };
@@ -5569,12 +5605,16 @@ CostumeIconMorph.prototype.editRotationPointOnly = function () {
 
 CostumeIconMorph.prototype.renameCostume = function () {
     var costume = this.object,
+        wardrobe = this.parentThatIsA(WardrobeMorph),
         ide = this.parentThatIsA(IDE_Morph);
     new DialogBoxMorph(
         null,
         function (answer) {
             if (answer && (answer !== costume.name)) {
-                costume.name = answer;
+                costume.name = wardrobe.sprite.newCostumeName(
+                    answer,
+                    costume
+                );
                 costume.version = Date.now();
                 ide.hasChangedMedia = true;
             }
@@ -5589,16 +5629,8 @@ CostumeIconMorph.prototype.renameCostume = function () {
 CostumeIconMorph.prototype.duplicateCostume = function () {
     var wardrobe = this.parentThatIsA(WardrobeMorph),
         ide = this.parentThatIsA(IDE_Morph),
-        newcos = this.object.copy(),
-        split = newcos.name.split(" ");
-    if (split[split.length - 1] === "copy") {
-        newcos.name += " 2";
-    } else if (isNaN(split[split.length - 1])) {
-        newcos.name = newcos.name + " copy";
-    } else {
-        split[split.length - 1] = Number(split[split.length - 1]) + 1;
-        newcos.name = split.join(" ");
-    }
+        newcos = this.object.copy();
+    newcos.name = wardrobe.sprite.newCostumeName(newcos.name);
     wardrobe.sprite.addCostume(newcos);
     wardrobe.updateList();
     if (ide) {
@@ -5966,7 +5998,10 @@ WardrobeMorph.prototype.removeCostumeAt = function (idx) {
 };
 
 WardrobeMorph.prototype.paintNew = function () {
-    var cos = new Costume(newCanvas(), "Untitled"),
+    var cos = new Costume(
+            newCanvas(),
+            this.sprite.newCostumeName(localize('Untitled'))
+        ),
         ide = this.parentThatIsA(IDE_Morph),
         myself = this;
     cos.edit(this.world(), ide, true, null, function () {
