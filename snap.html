@@ -3,7 +3,7 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 		<title>Snap! Build Your Own Blocks. Beta</title>
-        <link rel="shortcut icon" href="http://snap.berkeley.edu/fav3.gif" type="image/gif">
+		<link rel="shortcut icon" href="http://snap.berkeley.edu/fav3.gif" type="image/gif">
 		<script type="text/javascript" src="morphic.js"></script>
 		<script type="text/javascript" src="widgets.js"></script>
 		<script type="text/javascript" src="blocks.js"></script>
@@ -17,12 +17,13 @@
 		<script type="text/javascript" src="store.js"></script>
 		<script type="text/javascript" src="locale.js"></script>
 		<script type="text/javascript" src="cloud.js"></script>
-		<script type="text/javascript" src="sha512.js"></script>
+		<script type="text/javascript" src="lib/sha512.js"></script>
+		<script type="text/javascript" src="lib/jszip.min.js"></script>
 		<script type="text/javascript">
 			var world;
 			window.onload = function () {
 				world = new WorldMorph(document.getElementById('world'));
-                world.worldCanvas.focus();
+								world.worldCanvas.focus();
 				new IDE_Morph().openIn(world);
 				setInterval(loop, 1);
 			};
@@ -33,5 +34,5 @@
 	</head>
 	<body style="margin: 0;">
 		<canvas id="world" tabindex="1" style="position: absolute;" />
-    </body>
+	</body>
 </html>
