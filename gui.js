@@ -2854,7 +2854,13 @@ IDE_Morph.prototype.exportGlobalBlocks = function () {
 };
 
 IDE_Morph.prototype.exportSprite = function (sprite) {
-    var str = this.serializer.serialize(sprite.allParts());
+    var parts;
+    if (sprite instanceof StageMorph) {
+        parts = sprite;
+    } else {
+        parts = sprite.allParts();
+    }
+    var str = this.serializer.serialize(parts);
     window.open('data:text/xml,<sprites app="'
         + this.serializer.app
         + '" version="'
@@ -5266,6 +5272,7 @@ SpriteIconMorph.prototype.userMenu = function () {
             },
             'open a new window\nwith a picture of the stage'
         );
+        menu.addItem("export...", 'exportSprite');
         return menu;
     }
     if (!(this.object instanceof SpriteMorph)) {return null; }

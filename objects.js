@@ -2965,7 +2965,7 @@ SpriteMorph.prototype.applyGraphicsEffects = function (canvas) {
         var i;
         if (value !== 0) {
             for (i = 0; i < p.length; i += 4) {
-                p[i] += value; //255 = 100% of this color 
+                p[i] += value; //255 = 100% of this color
                 p[i + 1] += value;
                 p[i + 2] += value;
             }
@@ -4280,6 +4280,13 @@ StageMorph.prototype.init = function (globals) {
     this.acceptsDrops = false;
     this.setColor(new Color(255, 255, 255));
     this.fps = this.frameRate;
+};
+
+StageMorph.prototype.exportSprite = SpriteMorph.prototype.exportSprite = function () {
+    var ide = this.parentThatIsA(IDE_Morph);
+    if (ide) {
+        ide.exportSprite(this);
+    }
 };
 
 // StageMorph scaling
