@@ -1568,7 +1568,11 @@ IDE_Morph.prototype.droppedBinary = function (anArrayBuffer, name) {
         myself = this,
         suffix = name.substring(name.length - 3);
 
-    if (suffix.toLowerCase() !== 'ypr') {return; }
+    if (suffix.toLowerCase() === 'zip') {
+        // Handle a zip file here.
+    }
+    
+    if (suffix.toLowerCase() !== 'ypr') { return; }
 
     function loadYPR(buffer, lbl) {
         var reader = new sb.Reader(),
