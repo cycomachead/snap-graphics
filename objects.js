@@ -416,6 +416,7 @@ SpriteMorph.prototype.initBlocks = function () {
             defaults: [1]
         },
         doScreenshot: {
+            dev: true,
             type: 'command',
             category: 'looks',
             spec: 'save %imgsource as costume named %s',
@@ -424,7 +425,6 @@ SpriteMorph.prototype.initBlocks = function () {
 
         // Looks - Debugging primitives for development mode
         reportCostumes: {
-            dev: true,
             type: 'reporter',
             category: 'looks',
             spec: 'wardrobe'
@@ -1748,6 +1748,8 @@ SpriteMorph.prototype.blockTemplates = function (category) {
         blocks.push('-');
         blocks.push(block('comeToFront'));
         blocks.push(block('goBack'));
+        blocks.push('-');
+        blocks.push(block('reportCostumes'));
 
     // for debugging: ///////////////
 
@@ -1759,8 +1761,6 @@ SpriteMorph.prototype.blockTemplates = function (category) {
             txt.fontSize = 9;
             txt.setColor(this.paletteTextColor);
             blocks.push(txt);
-            blocks.push('-');
-            blocks.push(block('reportCostumes'));
             blocks.push('-');
             blocks.push(block('log'));
             blocks.push(block('alert'));
@@ -2980,7 +2980,7 @@ SpriteMorph.prototype.applyGraphicsEffects = function (canvas) {
         var i;
         if (value !== 0) {
             for (i = 0; i < p.length; i += 4) {
-                p[i] += value; //255 = 100% of this color 
+                p[i] += value; //255 = 100% of this color
                 p[i + 1] += value;
                 p[i + 2] += value;
             }
