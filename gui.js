@@ -2771,7 +2771,6 @@ IDE_Morph.prototype.rawSaveProject = function (name) {
             try {
                 localStorage['-snap-project-' + name]
                     = str = this.serializer.serialize(this.stage);
-                location.hash = '#open:' + str;
                 this.showMessage('Saved!', 1);
             } catch (err) {
                 this.showMessage('Save failed: ' + err);
@@ -2779,7 +2778,6 @@ IDE_Morph.prototype.rawSaveProject = function (name) {
         } else {
             localStorage['-snap-project-' + name]
                 = str = this.serializer.serialize(this.stage);
-            location.hash = '#open:' + str;
             this.showMessage('Saved!', 1);
         }
     }
@@ -2820,7 +2818,6 @@ IDE_Morph.prototype.exportProject = function (name, plain) {
                 str = encodeURIComponent(
                     this.serializer.serialize(this.stage)
                 );
-                location.hash = '#open:' + str;
                 window.open('data:text/'
                     + (plain ? 'plain,' + str : 'xml,' + str));
                 menu.destroy();
@@ -2833,7 +2830,6 @@ IDE_Morph.prototype.exportProject = function (name, plain) {
             str = encodeURIComponent(
                 this.serializer.serialize(this.stage)
             );
-            location.hash = '#open:' + str;
             window.open('data:text/'
                 + (plain ? 'plain,' + str : 'xml,' + str));
             menu.destroy();
@@ -3091,7 +3087,6 @@ IDE_Morph.prototype.openProject = function (name) {
         this.setProjectName(name);
         str = localStorage['-snap-project-' + name];
         this.openProjectString(str);
-        location.hash = '#open:' + str;
     }
 };
 
@@ -4868,6 +4863,7 @@ ProjectDialogMorph.prototype.deleteProject = function () {
 
 ProjectDialogMorph.prototype.shareProject = function () {
     var myself = this,
+        ide = this.ide,
         proj = this.listField.selected,
         entry = this.listField.active;
 
@@ -4898,6 +4894,15 @@ ProjectDialogMorph.prototype.shareProject = function () {
                             myself.ide.cloudError(),
                             [proj.ProjectName]
                         );
+                        // Set the Shared URL if the project is currently open
+                        if (proj.ProjectName === ide.projectName) {
+                            var usr = SnapCloud.username,
+                                projectId = 'Username=' +
+                                encodeURIComponent(usr.toLowerCase()) +
+                                '&ProjectName=' +
+                                encodeURIComponent(proj.projectName);
+                            location.hash = projectId;
+                        }
                     },
                     myself.ide.cloudError()
                 );
@@ -4908,6 +4913,7 @@ ProjectDialogMorph.prototype.shareProject = function () {
 
 ProjectDialogMorph.prototype.unshareProject = function () {
     var myself = this,
+        ide = this.ide,
         proj = this.listField.selected,
         entry = this.listField.active;
 
@@ -4939,6 +4945,10 @@ ProjectDialogMorph.prototype.unshareProject = function () {
                             myself.ide.cloudError(),
                             [proj.ProjectName]
                         );
+                        // Remove the shared URL if the project is open.
+                        if (proj.ProjectName === ide.projectName) {
+                            location.hash = '';
+                        }
                     },
                     myself.ide.cloudError()
                 );
