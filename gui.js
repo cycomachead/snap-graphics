@@ -4868,6 +4868,7 @@ ProjectDialogMorph.prototype.deleteProject = function () {
 
 ProjectDialogMorph.prototype.shareProject = function () {
     var myself = this,
+        ide = this.ide,
         proj = this.listField.selected,
         entry = this.listField.active;
 
@@ -4898,6 +4899,15 @@ ProjectDialogMorph.prototype.shareProject = function () {
                             myself.ide.cloudError(),
                             [proj.ProjectName]
                         );
+                        // Set the Shared URL if the project is currently open
+                        if (proj.ProjectName === ide.projectName) {
+                            var usr = SnapCloud.username,
+                                projectId = 'Username=' +
+                                encodeURIComponent(usr.toLowerCase()) +
+                                '&ProjectName=' +
+                                encodeURIComponent(proj.projectName);
+                            location.hash = projectId;
+                        }
                     },
                     myself.ide.cloudError()
                 );
@@ -4908,6 +4918,7 @@ ProjectDialogMorph.prototype.shareProject = function () {
 
 ProjectDialogMorph.prototype.unshareProject = function () {
     var myself = this,
+        ide = this.ide,
         proj = this.listField.selected,
         entry = this.listField.active;
 
@@ -4939,6 +4950,10 @@ ProjectDialogMorph.prototype.unshareProject = function () {
                             myself.ide.cloudError(),
                             [proj.ProjectName]
                         );
+                        // Remove the shared URL if the project is open.
+                        if (proj.ProjectName === ide.projectName) {
+                            location.hash = '';
+                        }
                     },
                     myself.ide.cloudError()
                 );
