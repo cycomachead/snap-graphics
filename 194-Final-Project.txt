@@ -1,0 +1,11 @@
+PLAN:
+
+* Promote Costumes to First Class Objects
+* We need a getPixelData(x, y, costume)
+* Need a makeCostume() block
+* Need a Scratch2RGB() block
+* Need RBG2Scratch()
+* Need makeTransform()
+* Need applyTransform()
+* Add a blur filter
+* 
