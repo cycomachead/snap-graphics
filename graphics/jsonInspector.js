@@ -16,50 +16,50 @@ function JsonInspectorMorph(target) {
 
 JsonInspectorMorph.prototype.init = function(target) {
 
-	var myself = this;
+    var myself = this;
     this.handle = null;
-	var inspector = new InspectorMorph(target);
-	var value = inspector.target.toString();
-	
+    var inspector = new InspectorMorph(target);
+    var value = inspector.target.toString();
+    
     JsonInspectorMorph.uber.init.call(this, target, function(){}, target);
 
-	this.labelString = value.length < 41 ? value : value.substring(0, 40) + '...';
-	this.createLabel();
+    this.labelString = value.length < 41 ? value : value.substring(0, 40) + '...';
+    this.createLabel();
 
-	this.list = inspector.list;
-	this.detail = inspector.detail;
+    this.list = inspector.list;
+    this.detail = inspector.detail;
 
-	var inspectIt = function() { myself.jsonInspect(inspector.currentProperty) };
+    var inspectIt = function() { myself.jsonInspect(inspector.currentProperty) };
 
-	this.list.doubleClickAction = inspectIt;
+    this.list.doubleClickAction = inspectIt;
 
-	var bdy = new AlignmentMorph('row', this.padding);
-	bdy.add(this.list);
-	bdy.add(this.detail);
+    var bdy = new AlignmentMorph('row', this.padding);
+    bdy.add(this.list);
+    bdy.add(this.detail);
 
-	bdy.padding = 10;
+    bdy.padding = 10;
     bdy.growth = 50;
     bdy.isDraggable = false;
     bdy.acceptsDrops = false;
 
     this.list.action = function () { myself.updateCurrentSelection(inspector) };
 
-	this.list.scrollBarSize = 1;
-	this.list.setHeight(180);
-	this.list.setWidth(this.list.width() + 2);
-	this.list.setLeft(0);
-	this.list.setTop(0);
-	this.detail.scrollBarSize = 1;
-	this.detail.setLeft(this.list.width() + 4);
-	this.detail.setTop(0);
-	this.detail.setHeight(this.list.height());
-	bdy.drawNew();
-	bdy.fixLayout();
+    this.list.scrollBarSize = 1;
+    this.list.setHeight(180);
+    this.list.setWidth(this.list.width() + 2);
+    this.list.setLeft(0);
+    this.list.setTop(0);
+    this.detail.scrollBarSize = 1;
+    this.detail.setLeft(this.list.width() + 4);
+    this.detail.setTop(0);
+    this.detail.setHeight(this.list.height());
+    bdy.drawNew();
+    bdy.fixLayout();
 
-	// We need to do this again in order for the doubleClickAction to percolate down to the list contents
-	this.list.buildListContents();
-	
-	this.addBody(bdy);
+    // We need to do this again in order for the doubleClickAction to percolate down to the list contents
+    this.list.buildListContents();
+    
+    this.addBody(bdy);
 
     this.addButton(inspectIt, 'Inspect');
     this.addButton('cancel', 'Close');
@@ -69,10 +69,10 @@ JsonInspectorMorph.prototype.init = function(target) {
 }
 
 JsonInspectorMorph.prototype.fixLayout = function () {
-	JsonInspectorMorph.uber.fixLayout.call(this);
+    JsonInspectorMorph.uber.fixLayout.call(this);
 // Resize code, it must be looked at!
-	/*
-	if (this.list) {
+    /*
+    if (this.list) {
 
     var x, y, r, b, w, h;
 
@@ -97,7 +97,7 @@ JsonInspectorMorph.prototype.fixLayout = function () {
     this.detail.setPosition(new Point(x, y));
     this.detail.setExtent(new Point(w, (h * 2 / 3) - this.edge));
     this.changed();
-	}*/
+    }*/
 };
 
 JsonInspectorMorph.prototype.updateCurrentSelection = function(inspector) {
@@ -121,10 +121,10 @@ JsonInspectorMorph.prototype.updateCurrentSelection = function(inspector) {
         txt = val;
     } else if (typeof val === 'object' ) {
         txt = JSON.stringify(val, null, "\t");
-		if (txt.length > 20000) { txt = txt.substring(0,20000) + '\n(...)' };
+        if (txt.length > 20000) { txt = txt.substring(0,20000) + '\n(...)' };
     } else {
         txt = val.toString();
-	}
+    }
     if (currentTxt.text === txt) {return; }
     cnts = new TextMorph(txt);
     cnts.isEditable = true;
@@ -132,17 +132,17 @@ JsonInspectorMorph.prototype.updateCurrentSelection = function(inspector) {
     cnts.setReceiver(inspector.target);
     this.detail.setContents(cnts);
 };
-	
+    
 JsonInspectorMorph.prototype.popUp = function (target) {
-	JsonInspectorMorph.uber.popUp.call(this, target.world());
-	this.handle = new HandleMorph(
-		this,
-		280,
-		220,
-		this.corner,
-		this.corner,
-		'resize'
-	);
+    JsonInspectorMorph.uber.popUp.call(this, target.world());
+    this.handle = new HandleMorph(
+        this,
+        280,
+        220,
+        this.corner,
+        this.corner,
+        'resize'
+    );
 };
 
 Morph.prototype.jsonInspect = function(inspectee) {
@@ -150,5 +150,5 @@ Morph.prototype.jsonInspect = function(inspectee) {
             this.world() : this.root() || this.world;
     inspector = new JsonInspectorMorph(inspectee);
     inspector.popUp(world);
-	return inspector;
+    return inspector;
 }

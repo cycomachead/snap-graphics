@@ -2,7 +2,7 @@
 
     lang-bn.js
 
-   	বাংলা (Bangla) translation for SNAP!
+       বাংলা (Bangla) translation for SNAP!
 
     written by Dr. Mokter Hossain
 
@@ -137,7 +137,7 @@
 
     When you're done, rename the edited file by replacing the "de" part of the
     filename with the two-letter ISO 639-1 code for your language, e.g.
-		bn - Bengali(Bangla) => lang-bn.js
+        bn - Bengali(Bangla) => lang-bn.js
         fr - French => lang-fr.js
         it - Italian => lang-it.js
         pl - Polish => lang-pl.js
@@ -249,8 +249,8 @@ SnapTranslator.dict.bn = {
     // tab help
     'costumes tab help':
         '\nনতুন/অতিরিক্ত পরিচ্ছদ ব্যবহারের জন্য প্রথমে ডান দিকের নিচের পরিচ্ছদ আইটেমে একটি ক্লিক কর, তারপর কম্পিউটার থেকে প্রত্যাশিত ছবির ফাইল নির্বাচন করে\nএখানে আনয়ন কর \n'
-    	+'\n\n'+
-    	'নতুন/অতিরিক্ত স্পাইট ব্যবহারের জন্য প্রথমে ডান দিকের নিচের স্পাইট আইটেমে একটি ক্লিক কর, তারপর কম্পিউটার থেকে প্রত্যাশিত ছবির ফাইল নির্বাচন করে\nএখানে আনয়ন কর \n',
+        +'\n\n'+
+        'নতুন/অতিরিক্ত স্পাইট ব্যবহারের জন্য প্রথমে ডান দিকের নিচের স্পাইট আইটেমে একটি ক্লিক কর, তারপর কম্পিউটার থেকে প্রত্যাশিত ছবির ফাইল নির্বাচন করে\nএখানে আনয়ন কর \n',
     'import a sound from your computer\nby dragging it into here':
         '\nশব্দ ব্যবহারের জন্য কম্পিউটার থেকে প্রত্যাশিত শব্দের ফাইল নির্বাচন করে এখানে আনয়ন করতে পার',
 
@@ -587,27 +587,27 @@ SnapTranslator.dict.bn = {
         'স্ক্রিপ্ট চলকসমূহ  %scriptVars',
 
     'list %exp':
-    	'তালিকা %exp',
+        'তালিকা %exp',
     '%s in front of %l':
-    	'%s %l তালিকার সামনে',
+        '%s %l তালিকার সামনে',
     'item %idx of %l':
-    	'%idx উপাদানটি  %l তালিকার',
+        '%idx উপাদানটি  %l তালিকার',
     'all but first of %l':
-    	'%l তালিকার সব কিন্তু প্রথমটি বাদে',
+        '%l তালিকার সব কিন্তু প্রথমটি বাদে',
     'length of %l':
-     	'%l তালিকার দৈর্ঘ্য',
+         '%l তালিকার দৈর্ঘ্য',
     '%l contains %s':
-    	'%l তালিকা  %s উপাদানটি ধারণ করে',
+        '%l তালিকা  %s উপাদানটি ধারণ করে',
     'thing':
-    	'বিষয়',
+        'বিষয়',
     'add %s to %l':
-    	'%s কে  %l তে সংযুক্ত কর',
+        '%s কে  %l তে সংযুক্ত কর',
     'delete %ida of %l':
-    	'%ida কে  %l থেকে মুছে ফেল',
+        '%ida কে  %l থেকে মুছে ফেল',
     'insert %s at %idx of %l':
-     	'%s কে  %idx স্থানে  %l তালিকায় সন্নিবেশিত কর',
+         '%s কে  %idx স্থানে  %l তালিকায় সন্নিবেশিত কর',
      'replace item %idx of %l with %s':
-    	'%idx স্থানের  %l তালিকার উপাদানটি  %s দ্বারা প্রতিস্থাপন কর',
+        '%idx স্থানের  %l তালিকার উপাদানটি  %s দ্বারা প্রতিস্থাপন কর',
 
     // other
     'Make a block':

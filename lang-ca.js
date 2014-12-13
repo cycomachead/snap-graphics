@@ -702,7 +702,7 @@ SnapTranslator.dict.ca = {
         'marca\'m per a fer que les ranures\nbuides tinguin la mateixa preferència que les\nplenes a l\'hora de deixar-hi caure peces',
     'Long form input dialog':
         'Forçar diàleg de selecció de tipus',
-	'Plain prototype labels':
+    'Plain prototype labels':
         'Etiquetes de prototip simples',
     'uncheck to always show (+) symbols\nin block prototype labels':
         'desmarca\'m per mostrar sempre el\nsímbol (+) en les etiquetes de prototip\nde bloc (a l\'editor de blocs)',
@@ -878,7 +878,7 @@ SnapTranslator.dict.ca = {
 
     // zoom blocks
     'Zoom blocks':
-    	'Canvia la mida dels blocs',
+        'Canvia la mida dels blocs',
     'build':
         'fes',
     'your own':
@@ -934,7 +934,7 @@ SnapTranslator.dict.ca = {
 
     // save project
     'Save Project As...':
-			'Anomena i desa projecte...',
+            'Anomena i desa projecte...',
 
     // export blocks
     'Export blocks':

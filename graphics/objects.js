@@ -252,94 +252,6 @@ SpriteMorph.prototype.initBlocks = function() {
 		spec: 'proxied %method at %protocol %s with parameters %mult%s',
 		defaults: ['GET', 'http://', null, null]
 	};
-
-	// Maps
-	this.blocks.showMap =
-	{
-		type: 'command',
-		category: 'map',
-		spec: 'show map'
-	};
-	this.blocks.hideMap =
-	{
-		type: 'command',
-		category: 'map',
-		spec: 'hide map'
-	};
-	this.blocks.switchView =
-	{
-		type: 'command',
-		category: 'map',
-		spec: 'switch view to %mapView'
-	};
-	this.blocks.setMapCenter =
-	{
-		type: 'command',
-		category: 'map',
-		spec: 'set center at long: %n lat: %n',
-		defaults: [2.061749, 41.359827]
-	};
-	this.blocks.getCurrentLongitude =
-	{
-		type: 'reporter',
-		category: 'map',
-		spec: 'current longitude',
-	};
-	this.blocks.getCurrentLatitude =
-	{
-		type: 'reporter',
-		category: 'map',
-		spec: 'current latitude',
-	};
-	this.blocks.setMapZoom =
-	{
-		type: 'command',
-		category: 'map',
-		spec: 'set zoom level to %zoomLevel'
-	};
-	this.blocks.getMapZoom =
-	{
-		type: 'reporter',
-		category: 'map',
-		spec: 'zoom level'
-	};
-	this.blocks.addMarker =
-	{
-		type: 'command',
-		category: 'map',
-		spec: '%clr marker at long %n lat %n value %s',
-		defaults: [null, 2.061749, 41.359827, 'Citilab']
-	};
-	this.blocks.simpleAddMarker =
-	{
-		type: 'command',
-		category: 'map',
-		spec: '%clr marker at %l value %s'
-	};
-	this.blocks.showMarkers =
-	{
-		type: 'command',
-		category: 'map',
-		spec: 'show markers'
-	};
-	this.blocks.hideMarkers =
-	{
-		type: 'command',
-		category: 'map',
-		spec: 'hide markers'
-	};
-	this.blocks.clearMarkers =
-	{
-		type: 'command',
-		category: 'map',
-		spec: 'remove all markers'
-	};
-	this.blocks.showBubbles =
-	{
-		type: 'command',
-		category: 'map',
-		spec: 'show bubbles'
-	};
 }
 
 SpriteMorph.prototype.initBlocks();
@@ -378,26 +290,6 @@ var blockTemplates = function(category) {
 		blocks.push(blockBySelector('apiCall'));
 		blocks.push(blockBySelector('proxiedApiCall'));
 	};
-
-//     if (category === 'map') {
-//         blocks.push(blockBySelector('showMap'));
-//         blocks.push(blockBySelector('hideMap'));
-//         blocks.push('-');
-//         blocks.push(blockBySelector('switchView'));
-//         blocks.push(blockBySelector('setMapCenter'));
-//         blocks.push(blockBySelector('getCurrentLongitude'));
-//         blocks.push(blockBySelector('getCurrentLatitude'));
-//         blocks.push(blockBySelector('setMapZoom'));
-//         blocks.push(blockBySelector('getMapZoom'));
-//         blocks.push('-');
-//         blocks.push(blockBySelector('addMarker'));
-//         blocks.push(blockBySelector('simpleAddMarker'));
-//         blocks.push(blockBySelector('showMarkers'));
-//         blocks.push(blockBySelector('hideMarkers'));
-//         blocks.push(blockBySelector('clearMarkers'));
-// //        blocks.push('-');
-// //        blocks.push(blockBySelector('showBubbles'));
-//     }
 	return blocks;
 }
 

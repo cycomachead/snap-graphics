@@ -1,27 +1,27 @@
 /*
 
-	lang-ja_HIRA.js
+    lang-ja_HIRA.js
 
-	Japanese Hiragana translation for SNAP!
+    Japanese Hiragana translation for SNAP!
 
-	written by Jens Mönig
+    written by Jens Mönig
 
-	Copyright (C) 2012 by Jens Mönig
+    Copyright (C) 2012 by Jens Mönig
 
-	This file is part of Snap!.
+    This file is part of Snap!.
 
-	Snap! is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Affero General Public License as
-	published by the Free Software Foundation, either version 3 of
-	the License, or (at your option) any later version.
+    Snap! is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of
+    the License, or (at your option) any later version.
 
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU Affero General Public License for more details.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
 
-	You should have received a copy of the GNU Affero General Public License
-	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 
@@ -630,8 +630,8 @@ SnapTranslator.dict.ja_HIRA = {
         'よみこみ...',
     'file menu import hint':
         'チェックするとレポーターをドラッグ&ドロップするとき\n'
-		+ 'そらのレポーターにフォーカスします\n\n'
-		+ 'いくつかのブラウザーではサポートされません',
+        + 'そらのレポーターにフォーカスします\n\n'
+        + 'いくつかのブラウザーではサポートされません',
     'Export project as plain text...':
         'テキストファイルとしてプロジェクトをかきだす...',
     'Export project...':

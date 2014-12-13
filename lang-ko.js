@@ -1,27 +1,27 @@
 /*
 
-	lang-ko.js
+    lang-ko.js
 
-	Korean translation for SNAP!
+    Korean translation for SNAP!
 
-	written by Jens Mönig
+    written by Jens Mönig
 
-	Copyright (C) 2012 by Jens Mönig
+    Copyright (C) 2012 by Jens Mönig
 
-	This file is part of Snap!.
+    This file is part of Snap!.
 
-	Snap! is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Affero General Public License as
-	published by the Free Software Foundation, either version 3 of
-	the License, or (at your option) any later version.
+    Snap! is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of
+    the License, or (at your option) any later version.
 
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU Affero General Public License for more details.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
 
-	You should have received a copy of the GNU Affero General Public License
-	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 
@@ -616,8 +616,8 @@ SnapTranslator.dict.ko = {
         '가져오기...',
     'file menu import hint':
         '내보낸 프로젝트 파일, 블록 라이브러리\n'
-		+ '스프라이트 모양 또는 소리를 가져옵니다.\n\n'
-		+ '일부 웹브라우저에서는 지원되지 않습니다.',
+        + '스프라이트 모양 또는 소리를 가져옵니다.\n\n'
+        + '일부 웹브라우저에서는 지원되지 않습니다.',
     'Export project as plain text...':
         '프로젝트를 텍스트 파일로 내보내기...',
     'Export project...':

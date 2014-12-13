@@ -1,27 +1,27 @@
 /*
 
-	lang-de.js
+    lang-de.js
 
-	German translation for SNAP!
+    German translation for SNAP!
 
-	written by Jens Mönig
+    written by Jens Mönig
 
-	Copyright (C) 2012 by Jens Mönig
+    Copyright (C) 2012 by Jens Mönig
 
-	This file is part of Snap!.
+    This file is part of Snap!.
 
-	Snap! is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Affero General Public License as
-	published by the Free Software Foundation, either version 3 of
-	the License, or (at your option) any later version.
+    Snap! is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of
+    the License, or (at your option) any later version.
 
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU Affero General Public License for more details.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
 
-	You should have received a copy of the GNU Affero General Public License
-	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 
@@ -680,7 +680,7 @@ SnapTranslator.dict.fr = {
             + 'lors du glisser-d\u00E9poser d\u0027un reporter',
     'uncheck to allow dropped\nreporters to kick out others':
         'D\u00E9cocher pour ne pas pr\u00E9f\u00E9rer des entr\u00E9es vides \n'
-		+ 'lors du glisser-d\u00E9poser d\u0027un reporter',
+        + 'lors du glisser-d\u00E9poser d\u0027un reporter',
     'Long form input dialog':
         'Bo\u00EEte d\u0027entr\u00E9e en mode d\u00E9taill\u00E9',
     'check to always show slot\ntypes in the input dialog':
@@ -703,10 +703,10 @@ SnapTranslator.dict.fr = {
         'Cliquetis',
     'uncheck to turn\nblock clicking\nsound off':
         'D\u00E9cocher pour d\u00E9sactiver le cliquetis \n'
-		+'lors de l\u0027embo\u00EEtement des blocs' ,
+        +'lors de l\u0027embo\u00EEtement des blocs' ,
     'check to turn\nblock clicking\nsound on':
         'Cocher pour activer le cliquetis \n'
-		+'lors de l\u0027embo\u00EEtement des blocs',
+        +'lors de l\u0027embo\u00EEtement des blocs',
     'Turbo mode':
         'Mode turbo',
     'check to prioritize\nscript execution':
@@ -718,22 +718,22 @@ SnapTranslator.dict.fr = {
     'check for alternative\nGUI design':
         'Cocher pour un style d\interface alternatif',
     'uncheck for default\nGUI design':
-	'D\u00E9cocher pour le style classique d\interface',		
+    'D\u00E9cocher pour le style classique d\interface',        
     'Thread safe scripts':
         'Scripts réentrants',
     'check to disallow\nscript reentrance':
         'Cocher pour interdire\n la r\u00E9entrance des scripts\n'
-	  +'et les ex\u00E9cuter s\u00E9par\u00E9ment',
+      +'et les ex\u00E9cuter s\u00E9par\u00E9ment',
     'uncheck to allow\nscript reentrance':
         'D\u00E9cocher pour permettre\n la r\u00E9entrance des scripts\n'
-	  +'o\u00F9 certains s\'ex\u00E9cutent en paral\u00E8lle',
+      +'o\u00F9 certains s\'ex\u00E9cutent en paral\u00E8lle',
     'Prefer smooth animations':
         'Vitesse d\'animation fixe',
     'uncheck for greater speed\nat variable frame rates':
         'D\u00E9cocher pour une vitesse\nd\'animation maximale (mais variable)',
     'check for smooth, predictable\nanimations across computers':
         'Cocher pour une vitesse d\'animation\nfixe et identique sur tous les ordinateurs',
-	
+    
     // inputs
     'with inputs':
         'avec entr\u00E9es',
@@ -958,7 +958,7 @@ SnapTranslator.dict.fr = {
         'tabulations',
     'cr':
         'retours de ligne',
-	
+    
   // About Snap
     'About Snap':
         'A propos de Snap',

@@ -27,7 +27,7 @@ Association.prototype.changed = function () {
 // Association setters:
 
 Association.prototype.setValue = function (element) {
-	this.value = element;
+    this.value = element;
     this.changed();
 };
 
@@ -62,7 +62,7 @@ AssociationWatcherMorph.prototype.init = function(association) {
     // additional properties
     this.labelText = association.key || '';
     this.version = null;
-	this.association = association;
+    this.association = association;
 
     // initialize inherited properties
     WatcherMorph.uber.init.call(
@@ -78,7 +78,7 @@ AssociationWatcherMorph.prototype.init = function(association) {
     this.style = 'normal';
     this.currentValue = null;
     this.labelMorph = null;
-	this.getter = association.getValue;
+    this.getter = association.getValue;
     this.sliderMorph = null;
     this.cellMorph = null;
     this.isDraggable = true;
@@ -94,7 +94,7 @@ AssociationWatcherMorph.prototype.update = function () {
         num;
     if (this.association) {
         this.updateLabel();
-		newValue = this.association.value;
+        newValue = this.association.value;
         num = +newValue;
         if (typeof newValue !== 'boolean' && !isNaN(num)) {
             newValue = Math.round(newValue * 1000000000) / 1000000000;
@@ -115,7 +115,7 @@ AssociationWatcherMorph.prototype.update = function () {
 AssociationWatcherMorph.prototype.updateLabel = function () {
     if (!this.association) { return; }
     if (this.association.version !== this.version) {
-		this.labelText = this.association.key;
+        this.labelText = this.association.key;
         if (this.labelMorph) {
             this.labelMorph.destroy();
             this.labelMorph = null;
@@ -183,9 +183,9 @@ AssociationWatcherMorph.prototype.fixLayout = function () {
         );
     }
 
-	this.bounds.corner.y = this.cellMorph.bottom()
-    	+ this.border
-		+ SyntaxElementMorph.prototype.typeInPadding;
+    this.bounds.corner.y = this.cellMorph.bottom()
+        + this.border
+        + SyntaxElementMorph.prototype.typeInPadding;
 
     this.bounds.corner.x = Math.max(
         this.cellMorph.right(),

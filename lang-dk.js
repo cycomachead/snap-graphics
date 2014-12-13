@@ -175,9 +175,9 @@ SnapTranslator.dict.dk = {
     …, š   \u00d6, \u00f6
     †, Ÿ   \u00dc, \u00fc
     §      \u00df
-    Æ,æ  	\u00C6,\u00E6
-    Ø,ø	\u00D8,\u00F8
-    Å,å	\u00C5,\u00E5
+    Æ,æ      \u00C6,\u00E6
+    Ø,ø    \u00D8,\u00F8
+    Å,å    \u00C5,\u00E5
 
 */
 

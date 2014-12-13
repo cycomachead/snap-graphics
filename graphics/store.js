@@ -42,7 +42,7 @@ SnapSerializer.prototype.loadBlock = function (model, isReporter) {
             });
         }
         if (!info) {
-			console.log('yep');
+            console.log('yep');
             return this.obsoleteBlock(isReporter);
         }
         block = info.type === 'command' ? new CustomCommandBlockMorph(
