@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>Snap! Graphics</title>
+		<link rel="shortcut icon" href="favicon.ico">
+		<script src="morphic.js"></script>
+		<script src="graphics/morphic.js"></script>
+		<script src="widgets.js"></script>
+		<script src="blocks.js"></script>
+		<script src="graphics/blocks.js"></script>
+		<script src="threads.js"></script>
+		<script src="graphics/threads.js"></script>
+		<script src="objects.js"></script>
+		<script src="graphics/OpenLayers.js"></script>
+		<script src="graphics/objects.js"></script>
+		<script src="gui.js"></script>
+		<script src="graphics/gui.js"></script>
+		<script src="graphics/jsonInspector.js"></script>
+		<script src="paint.js"></script>
+		<script src="lists.js"></script>
+		<script src="graphics/lists.js"></script>
+		<script src="graphics/association.js"></script>
+		<script src="byob.js"></script>
+		<script src="graphics/byob.js"></script>
+		<script src="xml.js"></script>
+		<script src="store.js"></script>
+		<script src="graphics/store.js"></script>
+		<script src="locale.js"></script>
+		<script src="cloud.js"></script>
+		<script src="sha512.js"></script>
+		<script>
+			var world;
+			window.onload = function () {
+				world = new WorldMorph(document.getElementById('world'));
+                world.worldCanvas.focus();
+				new IDE_Morph().openIn(world);
+				setInterval(loop, 1);
+			};
+			function loop() {
+				world.doOneCycle();
+			}
+		</script>
+	</head>
+	<body style="margin: 0;">
+		<canvas id="world" tabindex="1" style="position: absolute;" />
+	</body>
+</html>
