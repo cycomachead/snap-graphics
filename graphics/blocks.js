@@ -103,18 +103,6 @@ SyntaxElementMorph.prototype.labelPart = function(spec) {
                     false
                     );
             break;
-        case '%mapView':
-            part = new InputSlotMorph(
-                    null,
-                    false,
-                    {
-                    'Road Map' : ['road'],
-                    'Satellite' : ['satellite'], 
-                    'Political' : ['political'], 
-                    },
-                    true
-                    );
-            break;
         case '%clr':
             part = new ColorSlotMorph();
             break;

@@ -232,54 +232,6 @@ IDE_Morph.prototype.projectMenu = function () {
         menu.popup(world, pos);
 };
 
-// Snappy! logo
-
-IDE_Morph.prototype.createLogo = function () {
-        var myself = this;
-
-        if (this.logo) {
-                this.logo.destroy();
-        }
-
-        this.logo = new Morph();
-        this.logo.texture = 'graphics/logo.png'; // Overriden
-        this.logo.drawNew = function () {
-                this.image = newCanvas(this.extent());
-                var context = this.image.getContext('2d'),
-                    gradient = context.createLinearGradient(
-                                    0,
-                                    0,
-                                    this.width(),
-                                    0
-                                    );
-                gradient.addColorStop(0, 'black');
-                gradient.addColorStop(0.5, myself.frameColor.toString());
-                context.fillStyle = MorphicPreferences.isFlat ?
-                        myself.frameColor.toString() : gradient;
-                context.fillRect(0, 0, this.width(), this.height());
-                if (this.texture) {
-                        this.drawTexture(this.texture);
-                }
-        };
-
-        this.logo.drawCachedTexture = function () {
-                var context = this.image.getContext('2d');
-                context.drawImage(
-                                this.cachedTexture,
-                                5,
-                                Math.round((this.height() - this.cachedTexture.height) / 2)
-                                );
-                this.changed();
-        };
-
-        this.logo.mouseClickLeft = function () {
-                myself.snapMenu();
-        };
-
-        this.logo.color = new Color();
-        this.logo.setExtent(new Point(200, 28)); // dimensions are fixed
-        this.add(this.logo);
-};
 
 // Allow dropping of InspectorMorphs
 IDE_Morph.prototype.originalInit = IDE_Morph.prototype.init; 
@@ -292,28 +244,3 @@ IDE_Morph.prototype.init = function () {
     };
 }
 
-// Language
-
-IDE_Morph.prototype.originalSetLanguage = IDE_Morph.prototype.setLanguage;
-IDE_Morph.prototype.setLanguage = function(lang, callback) {
-    var myself = this;
-
-    myself.originalSetLanguage(lang, function() {
-        var translation = document.getElementById('graphics-language'),
-        src = 'graphics/lang-' + lang + '.js',
-        myInnerSelf = this;
-        if (translation) {
-            document.head.removeChild(translation);
-        }
-        if (lang === 'en') {
-            return this.reflectLanguage('en', callback);
-        }
-        translation = document.createElement('script');
-        translation.id = 'graphics-language';
-        translation.onload = function () {
-            myInnerSelf.reflectLanguage(lang, callback);
-        };
-        document.head.appendChild(translation);
-        translation.src = src; 
-    });
-};

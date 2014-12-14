@@ -2,19 +2,19 @@
 
 SpriteBubbleMorph.prototype.originalDataAsMorph = SpriteBubbleMorph.prototype.dataAsMorph;
 SpriteBubbleMorph.prototype.dataAsMorph = function (data) {
-		if (data instanceof Association) {
-				contents = new AssociationWatcherMorph(data);
-				contents.isDraggable = false;
-				contents.update(true);
-				contents.step = contents.update;
-		} else {
-				contents = this.originalDataAsMorph(data);
-		}
-		return contents;
+        if (data instanceof Association) {
+                contents = new AssociationWatcherMorph(data);
+                contents.isDraggable = false;
+                contents.update(true);
+                contents.step = contents.update;
+        } else {
+                contents = this.originalDataAsMorph(data);
+        }
+        return contents;
 }
 
-// CellMorph.prototype.drawNew override, because proxying is WAY too convoluted in this case
-
+// CellMorph.prototype.drawNew override, because proxying is WAY too convoluted
+// Done for displaying associations
 CellMorph.prototype.drawNew = function () {
     var context,
         txt,
@@ -74,9 +74,9 @@ CellMorph.prototype.drawNew = function () {
             this.contentsMorph.silentSetHeight(img.height);
             this.contentsMorph.image = img;
         } else if (this.contents instanceof Association) {
-			this.contentsMorph = new AssociationWatcherMorph(this.contents);
-			this.contentsMorph.isDraggable = false;
-		} else if (this.contents instanceof List) {
+            this.contentsMorph = new AssociationWatcherMorph(this.contents);
+            this.contentsMorph.isDraggable = false;
+        } else if (this.contents instanceof List) {
             if (this.isCircular()) {
                 this.contentsMorph = new TextMorph(
                     '(...)',
@@ -167,91 +167,87 @@ SpriteMorph.prototype.blockColor['api'] = new Color(120, 150, 50);
 
 // Definition of a new Map Category
 
-SpriteMorph.prototype.categories.push('map');
-SpriteMorph.prototype.blockColor['map'] = new Color(200, 20, 50);
+SpriteMorph.prototype.categories.push('grahpics');
+SpriteMorph.prototype.blockColor['grahpics'] = new Color(200, 20, 50);
 
 // Block specs
 
 SpriteMorph.prototype.originalInitBlocks = SpriteMorph.prototype.initBlocks;
 SpriteMorph.prototype.initBlocks = function() {
 
-	this.originalInitBlocks();
+    this.originalInitBlocks();
 
-	// Control
-	this.blocks.doForEach.category = 'control';
-	this.blocks.doForEach.dev = 'false';
+    // Control
+    this.blocks.doForEach.category = 'control';
+    this.blocks.doForEach.dev = 'false';
 
-	// Operators
-	this.blocks.colorFromPicker =
-	{
-		type: 'reporter',
-		category: 'operators',
-		spec: 'color %clr'
-	}
-	this.blocks.colorFromRGB =
-	{
-		type: 'reporter',
-		category: 'operators',
-		spec: 'color r: %n g: %n b: %n',
-		defaults: [250,128,64]
-	};
-	this.blocks.colorFromHSV =
-	{
-		type: 'reporter',
-		category: 'operators',
-		spec: 'color h: %n s: %n v: %n',
-		defaults: [0.3,0.7,0.9]
-	}
-	this.blocks.colorFromString =
-	{
-		type: 'reporter',
-		category: 'operators',
-		spec: 'magic color from %s',
-		defaults: [localize('Hello!')]
-	}
+    // Operators
+    this.blocks.colorFromPicker = {
+        type: 'reporter',
+        category: 'grahpics',
+        spec: 'color %clr' 
+    };
+    this.blocks.colorFromRGB = {
+        type: 'reporter',
+        category: 'graphics',
+        spec: 'color r: %n g: %n b: %n',
+        defaults: [250,128,64]
+    };
+    this.blocks.colorFromHSV = {
+        type: 'reporter',
+        category: 'graphics',
+        spec: 'color h: %n s: %n v: %n',
+        defaults: [0.3,0.7,0.9]
+    };
+    this.blocks.colorFromString = {
+        type: 'reporter',
+        category: 'graphics',
+        spec: 'magic color from %s',
+        defaults: [localize('Hello!')]
+    };
 
-	// API
-	this.blocks.jsonObject =
-	{
-		type: 'reporter',
-		category: 'api',
-		spec: 'object from JSON %s',
-		defaults: [localize('{"name":"John","surname":"Doe","age":14}')]
-	};
-	this.blocks.objectToJsonString =
-	{
-		type: 'reporter',
-		category: 'api',
-		spec: 'JSON from object %l'
-	};
+    // API
+    this.blocks.jsonObject =
+    {
+        type: 'reporter',
+        category: 'api',
+        spec: 'object from JSON %s',
+        defaults: [localize('{"name":"John","surname":"Doe","age":14}')]
+    };
+    this.blocks.objectToJsonString =
+    {
+        type: 'reporter',
+        category: 'api',
+        spec: 'JSON from object %l'
+    };
 
-	this.blocks.newAssociation =
-	{
-		type: 'reporter',
-		category: 'api',
-		spec: '%s → %s'
-	};
-	this.blocks.valueAt =
-	{
-		type: 'reporter',
-		category: 'api',
-		spec: 'value at %s of object %s'
-	};
+    this.blocks.newAssociation =
+    {
+        type: 'reporter',
+        category: 'api',
+        spec: '%s → %s'
+    };
+    this.blocks.valueAt =
+    {
+        type: 'reporter',
+        category: 'api',
+        spec: 'value at %s of object %s'
+    };
 
-	this.blocks.apiCall =
-	{
-		type: 'reporter',
-		category: 'api',
-		spec: '%method at %protocol %s with parameters %mult%s',
-		defaults: ['GET', 'http://', null, null]
-	};
-	this.blocks.proxiedApiCall =
-	{
-		type: 'reporter',
-		category: 'api',
-		spec: 'proxied %method at %protocol %s with parameters %mult%s',
-		defaults: ['GET', 'http://', null, null]
-	};
+    this.blocks.apiCall =
+    {
+        type: 'reporter',
+        category: 'api',
+        spec: '%method at %protocol %s with parameters %mult%s',
+        defaults: ['GET', 'http://', null, null]
+    };
+    this.blocks.proxiedApiCall =
+    {
+        type: 'reporter',
+        category: 'api',
+        spec: 'proxied %method at %protocol %s with parameters %mult%s',
+        defaults: ['GET', 'http://', null, null]
+    };
 }
 
 SpriteMorph.prototype.initBlocks();
@@ -259,38 +255,39 @@ SpriteMorph.prototype.initBlocks();
 // blockTemplates proxy
 
 var blockTemplates = function(category) {
-	var blocks = this.originalBlockTemplates(category); 
+    var blocks = this.originalBlockTemplates(category); 
 
-	function blockBySelector(selector) {
-		// Can't call myself, as these blocks belong only to SpriteMorph and I may be a StageMorph as well
-		var newBlock = SpriteMorph.prototype.blockForSelector(selector, true);
-		newBlock.isTemplate = true;
-		return newBlock;
-	};
+    function blockBySelector(selector) {
+        // Can't call myself, as these blocks belong only to SpriteMorph and I may be a StageMorph as well
+        var newBlock = SpriteMorph.prototype.blockForSelector(selector, true);
+        newBlock.isTemplate = true;
+        return newBlock;
+    };
 
-	if (category === 'variables') {
-		blocks.push(blockBySelector('doForEach'));
-	}
+    if (category === 'variables') {
+        blocks.push('=');
+        blocks.push(blockBySelector('doForEach'));
+    }
 
-	if (category === 'operators') {
-		blocks.push('-');
-		blocks.push(blockBySelector('colorFromPicker'));
-		blocks.push(blockBySelector('colorFromRGB'));
-		blocks.push(blockBySelector('colorFromHSV'));
-		blocks.push(blockBySelector('colorFromString'));
-	}
+    if (category === 'graphics') {
+        blocks.push('-');
+        blocks.push(blockBySelector('colorFromPicker'));
+        blocks.push(blockBySelector('colorFromRGB'));
+        blocks.push(blockBySelector('colorFromHSV'));
+        blocks.push(blockBySelector('colorFromString'));
+    }
 
-	if (category === 'api') {
-		blocks.push(blockBySelector('jsonObject'));
-		blocks.push(blockBySelector('objectToJsonString'));
-		blocks.push('-');
-		blocks.push(blockBySelector('newAssociation'));
-		blocks.push(blockBySelector('valueAt'));
-		blocks.push('-');
-		blocks.push(blockBySelector('apiCall'));
-		blocks.push(blockBySelector('proxiedApiCall'));
-	};
-	return blocks;
+    if (category === 'api') {
+        blocks.push(blockBySelector('jsonObject'));
+        blocks.push(blockBySelector('objectToJsonString'));
+        blocks.push('-');
+        blocks.push(blockBySelector('newAssociation'));
+        blocks.push(blockBySelector('valueAt'));
+        blocks.push('-');
+        blocks.push(blockBySelector('apiCall'));
+        blocks.push(blockBySelector('proxiedApiCall'));
+    };
+    return blocks;
 }
 
 SpriteMorph.prototype.originalBlockTemplates = SpriteMorph.prototype.blockTemplates;
@@ -299,226 +296,8 @@ SpriteMorph.prototype.blockTemplates = blockTemplates;
 StageMorph.prototype.originalBlockTemplates = StageMorph.prototype.blockTemplates;
 StageMorph.prototype.blockTemplates = blockTemplates;
 
-// OpenLayers Stage
-
-StageMorph.prototype.originalInit = StageMorph.prototype.init; 
-StageMorph.prototype.init = function (globals) {
-	this.originalInit(globals);
-	var myself = this;
-
-	var loc = ol.proj.transform([2.061749, 41.359827], 'EPSG:4326', 'EPSG:3857');
-
-	// Apparently, we need to create a stupid div on the DOM, even if it's not visible,
-	// so that the canvas shows the map and allows us to interact with it
-
-	this.mapDiv = document.createElement('div');
-	this.mapDiv.style['visibility'] = 'hidden';
-	this.mapDiv.style['position'] = 'fixed';
-	this.mapDiv.style['left'] = 0;
-	this.mapDiv.style['top'] = 0;
-	this.mapDiv.style['width'] = '480px';
-	this.mapDiv.style['height'] = '360px';
-	document.body.appendChild(this.mapDiv);
-
-	var markersSource = new ol.source.Vector({
-		features: []
-	});
-
-	var layers = { 
-		political:	new ol.layer.Tile({ source: new ol.source.TileJSON({ url: 'http://api.tiles.mapbox.com/v3/mapbox.geography-class.jsonp' }) }),
-		satellite:	new ol.layer.Tile({ source: new ol.source.MapQuest({ layer: 'sat'}) }),
-		road:		new ol.layer.Tile({ source: new ol.source.MapQuest({ layer: 'osm'}) }),
-		markers:	new ol.layer.Vector({ source: markersSource }) 
-	};
-
-	this.map = new ol.Map({
-		target: this.mapDiv,
-		renderer: 'canvas',
-		view: new ol.View({
-			zoom: 3,
-			center: loc
-		}),
-		layers: [ layers.satellite, layers.road, layers.political, layers.markers ]
-	});
-
-	this.map.layers = layers;
-
-	for (var property in this.map.layers) {
-		if (this.map.layers.hasOwnProperty(property)) {
-			this.map.layers[property].setVisible(false)
-		}
-	}
-
-	this.map.layers.markers.setVisible(true);
-	this.map.currentLayer = this.map.layers.road;
-	this.map.currentLayer.setVisible(true);
-	this.map.markers = markersSource;
-	this.map.showingBubbles = false;
-	this.map.canvas = this.map.getTarget().children[0].children[0];
-	this.map.visible = false;
-}
-
-StageMorph.prototype.originalDrawOn = StageMorph.prototype.drawOn;
-StageMorph.prototype.drawOn = function (aCanvas, aRect) {
-	var myself = this;
-	this.originalDrawOn(aCanvas, aRect);
-    var rectangle, area, delta, src, context, w, h, sl, st, ws, hs;
-    if (!this.isVisible) {
-        return null;
-    }
-    rectangle = aRect || this.bounds;
-    area = rectangle.intersect(this.bounds).round();
-    if (area.extent().gt(new Point(0, 0))) {
-        delta = this.position().neg();
-        src = area.copy().translateBy(delta).round();
-        context = aCanvas.getContext('2d');
-        context.globalAlpha = this.alpha;
-
-        sl = src.left();
-        st = src.top();
-        w = Math.min(src.width(), this.image.width - sl);
-        h = Math.min(src.height(), this.image.height - st);
-
-        if (w < 1 || h < 1) { return null };
-
-		// map canvas
-	
-		if (this.map.visible) {
-			ws = w / this.scale;
-			hs = h / this.scale;
-			this.mapDiv.style['width'] = w + 'px';
-			this.mapDiv.style['height'] = h + 'px';
-			context.save();
-			context.scale(this.scale, this.scale);
-            context.drawImage(
-                this.map.canvas,
-                src.left() / this.scale,
-                src.top() / this.scale,
-                ws,
-                hs,
-                area.left() / this.scale,
-                area.top() / this.scale,
-                ws,
-                hs
-            );
-			if (this.map.showingBubbles) {
-				this.map.markers.getFeatures().forEach(function(feature) {
-					var value = feature.get('value');
-					if (value) {
-						var bubble = new SpeechBubbleMorph(value),
-							coord = feature.getGeometry().getCoordinates(),
-							pos = myself.map.getPixelFromCoordinate(coord),
-							point = new Point(pos[0] + myself.left(), pos[1] + myself.top());
-						bubble.showUp(myself.world(), point);
-					}
-				})
-			}
-			context.restore();
-		}
-    }
-};
-
-StageMorph.prototype.featureAtPosition = function(pos) {
-	return this.map.forEachFeatureAtPixel(
-		[(pos.x - this.left()) / this.scale, (pos.y - this.top()) / this.scale], 
-		function(feature, layer) { return feature }
-	);
-}
-
-StageMorph.prototype.referencePos = null;
-
-StageMorph.prototype.mouseScroll = function(y, x) {
-	if (this.map.visible) {
-		if (y > 0) {
-			this.map.getView().setZoom(Math.min(this.map.getView().getZoom() + 1, 20));
-   		} else if (y < 0) {
-			this.map.getView().setZoom(Math.max(this.map.getView().getZoom() - 1, 1));
-	    }
-		this.delayedRefresh();
-	}
-};
-
-StageMorph.prototype.mouseDownLeft = function(pos) {
-    this.referencePos = pos;
-	var feature = this.featureAtPosition(pos);
-	if (feature) {
-    	var value = feature.get('value');
-		if (value) {
-			var bubble = new SpeechBubbleMorph(value);
-			bubble.popUp(this.world(), pos, true);
-		}
-    }
-};
-
-StageMorph.prototype.mouseDownRight = function(pos) {
-    this.referencePos = pos;
-};
-
-StageMorph.prototype.mouseMove = function(pos, button) {
-  		if (this.map.visible) {
-	    deltaX = this.referencePos.x - pos.x;
-	    deltaY = pos.y - this.referencePos.y;
-		this.referencePos = pos;
-		var view = this.map.getView();
-		var xFactor = Math.pow(2, view.getZoom()) / 4;
-		var yFactor = Math.pow(2, view.getZoom()) / 3;
-		view.setCenter(
-			[view.getCenter()[0] + deltaX / this.dimensions.x / xFactor * 10000000,
-			 view.getCenter()[1] + deltaY / this.dimensions.y / yFactor * 10000000]
-		)
-		this.delayedRefresh();
-	}
-};
-
-StageMorph.prototype.originalUserMenu = StageMorph.prototype.userMenu;
-StageMorph.prototype.userMenu = function() {
-	var myself = this,
-		feature = this.featureAtPosition(this.referencePos),
-		menu;
-
-	if (feature) {
-		var loc = ol.proj.transform(feature.getGeometry().getCoordinates(), 'EPSG:3857', 'EPSG:4326'),
-			menu = new MenuMorph(this);
-		menu.addItem(
-			'remove', 
-			function(){ 
-				myself.map.markers.removeFeature(feature);
-				myself.delayedRefresh();
-			});
-		menu.addLine();
-		menu.addItem(
-			'export...',
-			function () {
-				window.open(
-					'data:text/plain;charset=utf-8,' +
-					encodeURIComponent(feature.get('value'))
-				);
-			});
-		menu.addLine();
-		menu.addItem(
-			'show in OpenStreetMap',
-			function() {
-				window.open('http://www.openstreetmap.org/#map=17/' + loc[1] + '/' + loc[0]);
-			});
-		menu.addItem(
-			'show in GoogleMaps',
-			function() {
-				window.open('https://www.google.es/maps/@' + loc[1] + ',' + loc[0] + ',17z');
-			});
-		menu.addItem(
-			'show in Google StreetView',
-			function() {
-				window.open('http://maps.google.com/maps?q=&layer=c&cbll=' + loc[1] + ',' + loc[0]);
-			});
-
-	} else {
-		menu = this.originalUserMenu();
-	}
-	
-	return menu;
-}
 
 StageMorph.prototype.delayedRefresh = function(delay) {
-	var myself = this;		
-	setTimeout(function(){ myself.changed() }, delay?delay:100)
+    var myself = this;        
+    setTimeout(function(){ myself.changed() }, delay?delay:100)
 }
