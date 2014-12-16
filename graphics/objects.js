@@ -167,8 +167,8 @@ SpriteMorph.prototype.blockColor['api'] = new Color(120, 150, 50);
 
 // Definition of a new Map Category
 
-SpriteMorph.prototype.categories.push('grahpics');
-SpriteMorph.prototype.blockColor['grahpics'] = new Color(200, 20, 50);
+SpriteMorph.prototype.categories.push('graphics');
+SpriteMorph.prototype.blockColor['graphics'] = new Color(200, 20, 50);
 
 // Block specs
 
@@ -178,13 +178,13 @@ SpriteMorph.prototype.initBlocks = function() {
     this.originalInitBlocks();
 
     // Control
-    this.blocks.doForEach.category = 'control';
+    this.blocks.doForEach.category = 'lists';
     this.blocks.doForEach.dev = 'false';
 
     // Operators
     this.blocks.colorFromPicker = {
         type: 'reporter',
-        category: 'grahpics',
+        category: 'graphics',
         spec: 'color %clr' 
     };
     this.blocks.colorFromRGB = {
@@ -207,42 +207,36 @@ SpriteMorph.prototype.initBlocks = function() {
     };
 
     // API
-    this.blocks.jsonObject =
-    {
+    this.blocks.jsonObject = {
         type: 'reporter',
         category: 'api',
         spec: 'object from JSON %s',
         defaults: [localize('{"name":"John","surname":"Doe","age":14}')]
     };
-    this.blocks.objectToJsonString =
-    {
+    this.blocks.objectToJsonString = {
         type: 'reporter',
         category: 'api',
         spec: 'JSON from object %l'
     };
 
-    this.blocks.newAssociation =
-    {
+    this.blocks.newAssociation = {
         type: 'reporter',
         category: 'api',
         spec: '%s → %s'
     };
-    this.blocks.valueAt =
-    {
+    this.blocks.valueAt = {
         type: 'reporter',
         category: 'api',
         spec: 'value at %s of object %s'
     };
 
-    this.blocks.apiCall =
-    {
+    this.blocks.apiCall = {
         type: 'reporter',
         category: 'api',
         spec: '%method at %protocol %s with parameters %mult%s',
         defaults: ['GET', 'http://', null, null]
     };
-    this.blocks.proxiedApiCall =
-    {
+    this.blocks.proxiedApiCall = {
         type: 'reporter',
         category: 'api',
         spec: 'proxied %method at %protocol %s with parameters %mult%s',
