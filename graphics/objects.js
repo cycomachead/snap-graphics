@@ -272,6 +272,7 @@ SpriteMorph.prototype.initBlocks();
 // blockTemplates proxy
 
 var blockTemplates = function(category) {
+    var category = category || 'graphics';
     var blocks = this.originalBlockTemplates(category); 
 
     function blockBySelector(selector) {
@@ -341,24 +342,61 @@ function pixelList(r, g, b, a) {
     return new List([r, g, b, a]);
 }
 
+// These functions are to deal with the stupid 1Dness of JS image data.
+// There is probably a bit of optimization that could be done by not needing
+// these functions, but they are handy.
+function coorToLoc(x, y, width) {
+    return (y * width + x) * 4;
+}
+
+function locToCoord(loc, width) {
+    var y = Math.floor(loc / (width * 4));
+    var x = (loc % (width * 4)) / 4;
+
+    return {x: x, y: y};
+}
+
 /* Creates a new image from a 3-D array of pixels. 
  * This array is a list of rows, where each row is a list a list of pixels.
  * each pixel is a 4 item list: RGBA */
-
 SpriteMorph.prototype.newCostumeFromData = function(costumeName, data) {
-    var canvas  = newCanvas();
+    // Assume that the input is a valid formatted list.
+    // FIXME -- this is a really stupid thing to do in the long run.
+    // I guess error checking is always the first thing to go #GradWare.
+    
+    if (!(data instanceof List)) {
+        throw new Error('Input data must be a proper Snap! list.');
+    }
+    
+    var height  = data.length();
+    var width   = data.at(1).length();
+    var canvas  = newCanvas({x: width, y: height});
     var ctx     = canvas.getContext('2d');
     var costume = new Costume(canvas, costumeName);
+    var newimagedata = ctx.createImageData(width, height);
+    var pixels  = newimagedata.data;
     
     
-    ctx = canvas.getContext("2d");
-    imagedata = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    pixels = imagedata.data;
-
-    //the last object will have all the transformations done on it
-    newimagedata = ctx.createImageData(imagedata); //make imgdata object
+    var x = 1, y, row;
+    for(; x < data.length(); x += 1) {
+        row = data.at(x);
+        for(y = 1; y < row.length(); y += 1) {
+            loc = coorToLoc(x - 1, y - 1, width);
+            pixels[loc] = data.at(y).at(x).at(1);
+            pixels[loc + 1] = data.at(y).at(x).at(2);
+            pixels[loc + 2] = data.at(y).at(x).at(3);
+            pixels[loc + 3] = data.at(y).at(x).at(4);
+        }
+    }
+    
+    console.log(x);
+    console.log(y);
+    console.log(pixels.length);
+    
     newimagedata.data.set(pixels); //add transformed pixels
     ctx.putImageData(newimagedata, 0, 0);
+    
+    this.addCostume(costume)
 }
 
 StageMorph.prototype.newCostumeFromData =
@@ -380,20 +418,18 @@ SpriteMorph.prototype.getPixelDataForCostume = function(costumeName) {
             '\' could not be found.');
     }
     
-    console.log(id);
     costume   = this.costumes.at(id);
-    console.log(costume);
     canvas    = costume.contents;
-    console.log(canvas);
     ctx       = canvas.getContext("2d");
     imagedata = ctx.getImageData(0, 0, canvas.width, canvas.height);
     px        = imagedata.data;
 
     result = new List();
-    var x = 0, i, rowSize = canvas.width * 4;
-    for (; x < px.length; x += rowSize) {
+    var x = 0, y = 0, i, width = canvas.width, height = canvas.height;
+    for (; y < height; y += 1) {
         row = new List();
-        for (i = x; i < x + rowSize; i += 4) {
+        for (x = 0; x < width; x += 1) {
+            i = coorToLoc(x, y, width);
             row.add(pixelList(px[i], px[i + 1], px[i + 2], px[i + 3]));
         }
         result.add(row);
