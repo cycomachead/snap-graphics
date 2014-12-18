@@ -1,3 +1,25 @@
+// Graphics Effecits (Michael Ball)
+// Colors
+Process.prototype.colorFromRGB = function(r, g, b, a) {
+        return new Color(r, g, b, a);
+}
+
+Process.prototype.colorFromHSV = function(h,s,v) {
+        var color = new Color();
+        color.set_hsv(h,s,v);
+        return color;
+}
+
+Process.prototype.colorFromPicker = function(color) {
+        return color;
+}
+
+Process.prototype.colorFromPickerAsList = function(color) {
+        return new List([color.r, color.g, color.b, color.a]);
+}
+
+
+
 // API category
 
 Process.prototype.newAssociation = function(key, value) {
@@ -103,24 +125,8 @@ Process.prototype.proxiedApiCall = function (method, protocol, url, parameters) 
 
 Process.prototype.showBubbles = function() {
         var stage = this.homeContext.receiver.parentThatIsA(StageMorph);
-        stage.map.showingBubbles = true;
 }
 
-// Colors
-
-Process.prototype.colorFromRGB = function(r,g,b) {
-        return new Color(r,g,b);
-}
-
-Process.prototype.colorFromHSV = function(h,s,v) {
-        var color = new Color();
-        color.set_hsv(h,s,v);
-        return color;
-}
-
-Process.prototype.colorFromPicker = function(color) {
-        return color;
-}
 
 Process.prototype.colorFromString = function(string) {
         return this.colorFromHSV(((Math.abs(string.toString().split('').reduce(function(a,b){ a = ((a<<5) - a) + b.charCodeAt(0); return a & a }, 0)) % 255)/255),1,1)

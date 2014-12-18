@@ -165,7 +165,7 @@ CellMorph.prototype.drawNew = function () {
 SpriteMorph.prototype.categories.push('api');
 SpriteMorph.prototype.blockColor['api'] = new Color(120, 150, 50);
 
-// Definition of a new Map Category
+// Definition of a new Graphics Category
 
 SpriteMorph.prototype.categories.push('graphics');
 SpriteMorph.prototype.blockColor['graphics'] = new Color(200, 20, 50);
@@ -178,20 +178,28 @@ SpriteMorph.prototype.initBlocks = function() {
     this.originalInitBlocks();
 
     // Control
-    this.blocks.doForEach.category = 'lists';
+    this.blocks.doForEach.spec = 'for each %upvar in %l %cs',
+    this.blocks.doForEach.defaults = [localize('item')]
     this.blocks.doForEach.dev = 'false';
 
-    // Operators
+    // Graphics Blocks
     this.blocks.colorFromPicker = {
         type: 'reporter',
         category: 'graphics',
         spec: 'color %clr' 
     };
+    
+    this.blocks.colorFromPickerAsList = {
+        type: 'reporter',
+        category: 'graphics',
+        spec: 'color %clr as list' 
+    };
+    
     this.blocks.colorFromRGB = {
         type: 'reporter',
         category: 'graphics',
-        spec: 'color r: %n g: %n b: %n',
-        defaults: [250,128,64]
+        spec: 'color r: %n g: %n b: %n a: %n',
+        defaults: [250, 128, 64, 1]
     };
     this.blocks.colorFromHSV = {
         type: 'reporter',
@@ -205,6 +213,21 @@ SpriteMorph.prototype.initBlocks = function() {
         spec: 'magic color from %s',
         defaults: [localize('Hello!')]
     };
+    
+    this.blocks.newCostumeFromData = {
+        type: 'command',
+        category: 'graphics',
+        spec: 'new costume named %s from data %l'
+    };
+    
+    this.blocks.getPixelDataForCostume = {
+        type: 'reporter',
+        category: 'graphics',
+        spec: 'pixel data from costume %cst'
+    };
+    
+    
+    
 
     // API
     this.blocks.jsonObject = {
@@ -265,10 +288,13 @@ var blockTemplates = function(category) {
 
     if (category === 'graphics') {
         blocks.push('-');
+        blocks.push(blockBySelector('colorFromPickerAsList'));
         blocks.push(blockBySelector('colorFromPicker'));
         blocks.push(blockBySelector('colorFromRGB'));
         blocks.push(blockBySelector('colorFromHSV'));
         blocks.push(blockBySelector('colorFromString'));
+        blocks.push(blockBySelector('newCostumeFromData'));
+        blocks.push(blockBySelector('getPixelDataForCostume'));
     }
 
     if (category === 'api') {
@@ -295,3 +321,86 @@ StageMorph.prototype.delayedRefresh = function(delay) {
     var myself = this;        
     setTimeout(function(){ myself.changed() }, delay?delay:100)
 }
+
+
+
+/******************************************************************************
+ *  GRAPHICS BLOCKS *
+ *****************************************************************************/
+SpriteMorph.prototype.getCostumeIdFromName = function (name) {
+    var costumes = this.costumes; // FIXME: should really call asArray
+    for (var i = 1; i <= costumes.length(); i += 1) {
+        if (costumes.at(i).name === name) { return i; }
+    }
+    return -1;
+};
+
+/* A list representing a pixel coloring. Eventually this should be a 
+  * "association" since the {R:, G:, B:, A: } object is much more clear */
+function pixelList(r, g, b, a) {
+    return new List([r, g, b, a]);
+}
+
+/* Creates a new image from a 3-D array of pixels. 
+ * This array is a list of rows, where each row is a list a list of pixels.
+ * each pixel is a 4 item list: RGBA */
+
+SpriteMorph.prototype.newCostumeFromData = function(costumeName, data) {
+    var canvas  = newCanvas();
+    var ctx     = canvas.getContext('2d');
+    var costume = new Costume(canvas, costumeName);
+    
+    
+    ctx = canvas.getContext("2d");
+    imagedata = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    pixels = imagedata.data;
+
+    //the last object will have all the transformations done on it
+    newimagedata = ctx.createImageData(imagedata); //make imgdata object
+    newimagedata.data.set(pixels); //add transformed pixels
+    ctx.putImageData(newimagedata, 0, 0);
+}
+
+StageMorph.prototype.newCostumeFromData =
+    SpriteMorph.prototype.newCostumeFromData;
+
+/* Return a 3-D list of image data. This is currently a bad way to do things
+    because Snap! lists are 64bit arrays. In the future there should be a more
+    efficient way of representing data because this is an 8x waste in memory.*/
+SpriteMorph.prototype.getPixelDataForCostume = function(costumeName) {
+    // var costume, canvas, ctx, imagedata, px, result, row, id;
+    
+    if (costumeName === 'Turtle') {
+    throw new Error('The Turtle costume currently isn\'t supported.');
+    }
+    
+    id = this.getCostumeIdFromName(costumeName);
+    if (id === -1) {
+        throw new Error('The costume named \'' + costumeName +
+            '\' could not be found.');
+    }
+    
+    console.log(id);
+    costume   = this.costumes.at(id);
+    console.log(costume);
+    canvas    = costume.contents;
+    console.log(canvas);
+    ctx       = canvas.getContext("2d");
+    imagedata = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    px        = imagedata.data;
+
+    result = new List();
+    var x = 0, i, rowSize = canvas.width * 4;
+    for (; x < px.length; x += rowSize) {
+        row = new List();
+        for (i = x; i < x + rowSize; i += 4) {
+            row.add(pixelList(px[i], px[i + 1], px[i + 2], px[i + 3]));
+        }
+        result.add(row);
+    }
+    
+    return result;
+}
+
+StageMorph.prototype.getPixelDataForCostume =
+    SpriteMorph.prototype.getPixelDataForCostume;
