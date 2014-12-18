@@ -263,7 +263,7 @@ SpriteMorph.prototype.initBlocks = function() {
     this.blocks.applyFilter = {
         type: 'command',
         category: 'graphics',
-        spec: 'apply %filter2 to %cst with with inputs %l'
+        spec: 'apply filter: %filter2 to costume: %cst with with inputs %l'
     };
     
     // API
@@ -603,15 +603,73 @@ SpriteMorph.prototype.reportConv = function(data, matrix) {
     ];
     console.log(mat);
     
-    var newData = Filters.filterImage(Filters.convolute, px, mat);
+    var newData = Filter.filterImage(Filter.convolute, px, mat);
     return convertPixelsToList(newData.data, canv.width, canv.height)
 };
 
 StageMorph.prototype.reportConv = SpriteMorph.prototype.reportConv;
 
 
-SpriteMorph.prototype.applyFilter = function(filter, costumeName, list) {
+SpriteMorph.prototype.applyFilter = function(filter, costumeName, params) {
+    var id      = this.getCostumeIdFromName(costumeName);
+    var costume = this.costumes.at(id);
+    var canvas  = costume.contents;
     
+    var ctx     = canvas.getContext('2d');
+    var px      = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+    var filterResult;
+    switch (filter[0]) { // FIXME: Should reference input option directly
+    case 'convolve':
+        // TODO: Error Handling
+        var mat  = [
+            params.at(1).at(1), params.at(1).at(2), params.at(1).at(3),
+            params.at(2).at(1), params.at(2).at(2), params.at(2).at(3),
+            params.at(3).at(1), params.at(3).at(2), params.at(3).at(3),
+        ];
+    
+        filterResult = Filter.filterImage(Filter.convolute, px, mat);
+        break;
+    case 'greyscale':
+        filterResult = Filter.filterImage(Filter.grayscale, px);
+        break;
+    case 'transform': // Try to apply a basic canvas transform. More performant.
+        // Map the coordinates from a Snap! list to the set transform function
+        /* https://developer.apple.com/library/safari/documentation/AudioVideo/Conceptual/HTML-canvas-guide/MatrixTransforms/MatrixTransforms.html#//apple_ref/doc/uid/TP40010542-CH10-SW13 */
+        console.log('transform');
+        ctx.save();
+        // TODO: Holy crap this needs error checking!!!
+        console.log(params.at(1).at(1), params.at(2).at(1),
+                         params.at(1).at(2), params.at(2).at(2),
+                         params.at(1).at(3), params.at(2).at(3));
+        ctx.setTransform(params.at(1).at(1), params.at(2).at(1),
+                         params.at(1).at(2), params.at(2).at(2),
+                         params.at(1).at(3), params.at(2).at(3));
+        ctx.restore();
+        filterResult = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        break;
+    case 'threshold':
+        filterResult = Filter.filterImage(Filter.threshold, px, params.at(0));
+        break;
+    default:
+        return; // No Known filter, so exit.
+    }
+    
+    if (filterResult) { // transform filter modifies canvas directly
+        console.log('FILTERED');
+        var newimagedata = ctx.createImageData(canvas.width, canvas.height);
+        newimagedata.data.set(filterResult.data); //add transformed pixels
+        ctx.putImageData(newimagedata, 0, 0);
+    }
+
+
+    // TODO: Check for WRAPED STATE
+    // Re-draw ourselves if we are wearing the costume being edited.
+    if (this.costume.name === costumeName) {
+        this.changed();
+        this.drawNew();
+        this.changed();
+    }
 };
 
 StageMorph.prototype.applyFilter = SpriteMorph.prototype.applyFilter;
@@ -619,15 +677,15 @@ StageMorph.prototype.applyFilter = SpriteMorph.prototype.applyFilter;
 
 // Some attempts at a better generic filtering method
 // Idea from HTML5 rocks tutorial on processing images
-Filters = {};
-Filters.getPixels = function(img) {
+Filter = {};
+Filter.getPixels = function(img) {
     var c = this.getCanvas(img.width, img.height);
     var ctx = c.getContext('2d');
     ctx.drawImage(img, 0, 0);
     return ctx.getImageData(0,0,c.width,c.height);
 };
 
-Filters.getCanvas = function(w,h) {
+Filter.getCanvas = function(w,h) {
     var c = document.createElement('canvas');
     c.width = w;
     c.height = h;
@@ -635,7 +693,7 @@ Filters.getCanvas = function(w,h) {
 };
 
 // Wrapper function to apply a generic filter.
-Filters.filterImage = function(filter, image, var_args) {
+Filter.filterImage = function(filter, image, var_args) {
     console.log('FILTER');
     console.log(var_args);
     var args;
@@ -650,7 +708,7 @@ Filters.filterImage = function(filter, image, var_args) {
     return filter.apply(null, args);
 };
 
-Filters.grayscale = function(pixels, args) {
+Filter.grayscale = function(pixels, args) {
     var d = pixels.data;
     for (var i = 0; i < d.length; i += 4) {
         var r = d[i];
@@ -664,7 +722,7 @@ Filters.grayscale = function(pixels, args) {
     return pixels;
 };
 
-Filters.threshold = function(pixels, threshold) {
+Filter.threshold = function(pixels, threshold) {
     var d = pixels.data;
     for (var i = 0; i < d.length; i += 4) {
       var r = d[i];
@@ -676,14 +734,14 @@ Filters.threshold = function(pixels, threshold) {
     return pixels;
 };
 
-Filters.tmpCanvas = document.createElement('canvas');
-Filters.tmpCtx = Filters.tmpCanvas.getContext('2d');
+Filter.tmpCanvas = document.createElement('canvas');
+Filter.tmpCtx = Filter.tmpCanvas.getContext('2d');
 
-Filters.createImageData = function(w,h) {
+Filter.createImageData = function(w,h) {
   return this.tmpCtx.createImageData(w,h);
 };
 
-Filters.convolute = function(pixels, weights, opaque) {
+Filter.convolute = function(pixels, weights, opaque) {
     console.log('CONVOLE');
     console.log('weights');
     console.log(weights);
@@ -697,7 +755,7 @@ Filters.convolute = function(pixels, weights, opaque) {
     // pad output by the convolution matrix
     var w = sw;
     var h = sh;
-    var output = Filters.createImageData(w, h);
+    var output = Filter.createImageData(w, h);
     var dst = output.data;
     // go through the destination image pixels
     var alphaFac = opaque ? 1 : 0;
@@ -718,13 +776,6 @@ Filters.convolute = function(pixels, weights, opaque) {
                 if (scy >= 0 && scy < sh && scx >= 0 && scx < sw) {
                   var srcOff = (scy*sw+scx)*4;
                   var wt = weights[cy*side+cx];
-                  if (wt === 0) {
-                      console.log('wat');
-                      console.log(cy);
-                      console.log(cx);
-                      console.log(side);
-                  }
-                  // console.log(wt);
                   r += src[srcOff] * wt;
                   g += src[srcOff + 1] * wt;
                   b += src[srcOff + 2] * wt;
