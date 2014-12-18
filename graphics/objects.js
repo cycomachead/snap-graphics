@@ -261,7 +261,7 @@ SpriteMorph.prototype.initBlocks = function() {
     };
     
     this.blocks.applyFilter = {
-        type: 'reporter',
+        type: 'command',
         category: 'graphics',
         spec: 'apply %filter2 to %cst with with inputs %l'
     };
@@ -343,6 +343,7 @@ var blockTemplates = function(category) {
         blocks.push(blockBySelector('reportFilter'));
         blocks.push('-');
         blocks.push(blockBySelector('reportConv'));
+        blocks.push('-');
         blocks.push(blockBySelector('applyFilter'));
     }
 
@@ -429,16 +430,17 @@ SpriteMorph.prototype.newCostumeFromData = function(costumeName, data) {
     var newimagedata = ctx.createImageData(width, height);
     var pixels  = newimagedata.data;
     
-    
+    // FIXME  --- use H and W
     var x = 1, y, row;
-    for(; x < data.length(); x += 1) {
+    for(; x <= data.length(); x += 1) {
         row = data.at(x);
-        for(y = 1; y < row.length(); y += 1) {
+        for(y = 1; y <= row.length(); y += 1) {
             loc = coorToLoc(x - 1, y - 1, width);
-            pixels[loc] = data.at(y).at(x).at(1);
-            pixels[loc + 1] = data.at(y).at(x).at(2);
-            pixels[loc + 2] = data.at(y).at(x).at(3);
-            var a = data.at(y).at(x).at(4); // FIXME -- this is HACKY!!!
+            
+            pixels[loc] = data.at(x).at(y).at(1);
+            pixels[loc + 1] = data.at(x).at(y).at(2);
+            pixels[loc + 2] = data.at(x).at(y).at(3);
+            var a = data.at(x).at(y).at(4); // FIXME -- this is HACKY!!!
             pixels[loc + 3] = a == 1 ? 255 : a;
         }
     }
@@ -569,15 +571,16 @@ function canvasFromList(data) {
     var newimagedata = ctx.createImageData(width, height);
     var pixels  = newimagedata.data;
     
+    // FIXME -- use H and W
     var x = 1, y, row;
-    for(; x < data.length(); x += 1) {
+    for(; x <= data.length(); x += 1) {
         row = data.at(x);
-        for(y = 1; y < row.length(); y += 1) {
+        for(y = 1; y <= row.length(); y += 1) {
             loc = coorToLoc(x - 1, y - 1, width);
-            pixels[loc] = data.at(y).at(x).at(1);
-            pixels[loc + 1] = data.at(y).at(x).at(2);
-            pixels[loc + 2] = data.at(y).at(x).at(3);
-            var a = data.at(y).at(x).at(4); // FIXME -- this is HACKY!!!
+            pixels[loc] = data.at(x).at(y).at(1);
+            pixels[loc + 1] = data.at(x).at(y).at(2);
+            pixels[loc + 2] = data.at(x).at(y).at(3);
+            var a = data.at(x).at(y).at(4); // FIXME -- this is HACKY!!!
             pixels[loc + 3] = a == 1 ? 255 : a;
         }
     }
@@ -594,32 +597,33 @@ SpriteMorph.prototype.reportConv = function(data, matrix) {
     var px   = ctx.getImageData(0, 0, canv.width, canv.height);
     // TODO: SERIOUS ERROR HANDLING NEEDED!!!
     var mat  = [
-        [matrix.at(1).at(1), matrix.at(1).at(2), matrix.at(1).at(3)],
-        [matrix.at(2).at(1), matrix.at(2).at(2), matrix.at(2).at(3)],
-        [matrix.at(3).at(1), matrix.at(3).at(2), matrix.at(3).at(3)],
+        matrix.at(1).at(1), matrix.at(1).at(2), matrix.at(1).at(3),
+        matrix.at(2).at(1), matrix.at(2).at(2), matrix.at(2).at(3),
+        matrix.at(3).at(1), matrix.at(3).at(2), matrix.at(3).at(3),
     ];
+    console.log(mat);
     
     var newData = Filters.filterImage(Filters.convolute, px, mat);
-    return convertToPixelList(newData.data, canv.width, canv.height)
-}
+    return convertPixelsToList(newData.data, canv.width, canv.height)
+};
 
 StageMorph.prototype.reportConv = SpriteMorph.prototype.reportConv;
 
 
 SpriteMorph.prototype.applyFilter = function(filter, costumeName, list) {
     
-}
+};
 
 StageMorph.prototype.applyFilter = SpriteMorph.prototype.applyFilter;
 
 
 // Some attempts at a better generic filtering method
 // Idea from HTML5 rocks tutorial on processing images
-Filters = {}
+Filters = {};
 Filters.getPixels = function(img) {
     var c = this.getCanvas(img.width, img.height);
     var ctx = c.getContext('2d');
-    ctx.drawImage(img);
+    ctx.drawImage(img, 0, 0);
     return ctx.getImageData(0,0,c.width,c.height);
 };
 
@@ -633,8 +637,8 @@ Filters.getCanvas = function(w,h) {
 // Wrapper function to apply a generic filter.
 Filters.filterImage = function(filter, image, var_args) {
     console.log('FILTER');
-    console.log(image);
-    var args
+    console.log(var_args);
+    var args;
     if (image instanceof ImageData) {
         args = [ image ];
     } else {
@@ -667,7 +671,7 @@ Filters.threshold = function(pixels, threshold) {
       var g = d[i+1];
       var b = d[i+2];
       var v = (0.2126*r + 0.7152*g + 0.0722*b >= threshold) ? 255 : 0;
-      d[i] = d[i+1] = d[i+2] = v
+      d[i] = d[i+1] = d[i+2] = v;
     }
     return pixels;
 };
@@ -680,6 +684,11 @@ Filters.createImageData = function(w,h) {
 };
 
 Filters.convolute = function(pixels, weights, opaque) {
+    console.log('CONVOLE');
+    console.log('weights');
+    console.log(weights);
+    console.log('opaque');
+    console.log(opaque);
     var side = Math.round(Math.sqrt(weights.length));
     var halfSide = Math.floor(side/2);
     var src = pixels.data;
@@ -699,25 +708,34 @@ Filters.convolute = function(pixels, weights, opaque) {
           var dstOff = (y*w+x)*4;
           // calculate the weighed sum of the source image pixels that
           // fall under the convolution matrix
-          var r=0, g=0, b=0, a=0;
-          for (var cy=0; cy<side; cy++) {
-            for (var cx=0; cx<side; cx++) {
-                var scy = sy + cy - halfSide;
-                var scx = sx + cx - halfSide;
+          var r = 0, g = 0, b = 0, a = 0;
+          for (var cy = 0; cy < side; cy += 1) {
+            for (var cx = 0; cx < side; cx += 1) {
+                var scy = Math.min(sh-1, Math.max(0, sy + cy - halfSide));
+                var scx = Math.min(sw-1, Math.max(0, sx + cx - halfSide));
+                // var scy = sy + cy - halfSide;
+                // var scx = sx + cx - halfSide;
                 if (scy >= 0 && scy < sh && scx >= 0 && scx < sw) {
                   var srcOff = (scy*sw+scx)*4;
                   var wt = weights[cy*side+cx];
+                  if (wt === 0) {
+                      console.log('wat');
+                      console.log(cy);
+                      console.log(cx);
+                      console.log(side);
+                  }
+                  // console.log(wt);
                   r += src[srcOff] * wt;
-                  g += src[srcOff+1] * wt;
-                  b += src[srcOff+2] * wt;
-                  a += src[srcOff+3] * wt;
+                  g += src[srcOff + 1] * wt;
+                  b += src[srcOff + 2] * wt;
+                  a += src[srcOff + 3] * wt;
                 }
             }
           }
           dst[dstOff] = r;
-          dst[dstOff+1] = g;
-          dst[dstOff+2] = b;
-          dst[dstOff+3] = a + alphaFac*(255-a);
+          dst[dstOff + 1] = g;
+          dst[dstOff + 2] = b;
+          dst[dstOff + 3] = a + alphaFac * (255 - a);
       }
     }
     return output;

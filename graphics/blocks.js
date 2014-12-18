@@ -732,6 +732,7 @@ SyntaxElementMorph.prototype.labelPart = function (spec) {
                 false,
                 {   'convolution' : ['convolve'],
                     'greyscale' : ['greyscale'],
+                    'threshold' : ['threshold'],
                     'transform' : ['transform'] },
                 true );
             break;

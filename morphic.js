@@ -1095,7 +1095,7 @@ var PIXEL_RATIO = (function () {
               ctx.msBackingStorePixelRatio ||
               ctx.oBackingStorePixelRatio ||
               ctx.backingStorePixelRatio || 1;
-
+  return 1;
     return dpr / bsr;
 })();
 
