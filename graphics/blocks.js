@@ -682,6 +682,8 @@ SyntaxElementMorph.prototype.labelPart = function (spec) {
                     new Point() : this.embossing;
             part.drawNew();
             break;
+            
+     //////////// NEW STUFF
         case '%protocol':
             part = new InputSlotMorph(
                     null,
@@ -711,6 +713,18 @@ SyntaxElementMorph.prototype.labelPart = function (spec) {
             break;
         case '%clr':
             part = new ColorSlotMorph();
+            break;
+        case '%filter':
+            part = new InputSlotMorph(
+                null,
+                false,
+                {   'average' : ['average'],
+                    'sobel' : ['sobel'],
+                    'prewitt' : ['prewitt'],
+                    'laplacian' : ['laplacian'],
+                    'disk' : ['disk'],
+                     'simple sharpen' : ['sharpen'] },
+                true );
             break;
         default:
             nop();

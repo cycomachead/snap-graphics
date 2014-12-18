@@ -1,4 +1,51 @@
 // Graphics Effecits (Michael Ball)
+Process.prototype.reportFilter = function(filter, param) {
+    var result, tmp;
+    
+    switch (this.inputOption(filter)) {
+    case 'sobel':
+        result = new List();
+        result.add(new List([1, 2, 1]));
+        result.add(new List([0, 0, 0]));
+        result.add(new List([-1, -2, -1]));
+        break;
+    case 'prewitt':
+        result = new List();
+        result.add(new List([1, 1, 1]));
+        result.add(new List([0, 0, 0]));
+        result.add(new List([-1, -1, -1]));
+        break;
+    case 'average':
+        // Create an Average Filter
+        var row = (param ? 3 : param);
+        tmp = new Array(row);
+        var i = 0, elems = Math.pow(row, 2);
+        for (; i < tmp.length; i += 1) {
+            tmp[i] = 1 / elems;
+        }
+        tmp = new List(tmp);
+        result = new List()
+        for(i = 0; i < row; i += 1) {
+            result.add(tmp);
+        }
+        break;
+    case 'sharpen':
+        result = new List();
+        result.add(new List([0, -1, 0]));
+        result.add(new List([-1, 5, -1]));
+        result.add(new List([0, -1, 0]));
+        break;
+    case 'disk':
+    case 'laplacian':
+    default:
+        result = new List();
+    }
+    return result
+}
+
+
+
+
 // Colors
 Process.prototype.colorFromRGB = function(r, g, b, a) {
         return new Color(r, g, b, a);
