@@ -723,7 +723,16 @@ SyntaxElementMorph.prototype.labelPart = function (spec) {
                     'prewitt' : ['prewitt'],
                     'laplacian' : ['laplacian'],
                     'disk' : ['disk'],
-                     'simple sharpen' : ['sharpen'] },
+                    'simple sharpen' : ['sharpen'] },
+                true );
+            break;
+        case '%filter2':
+            part = new InputSlotMorph(
+                null,
+                false,
+                {   'convolution' : ['convolve'],
+                    'greyscale' : ['greyscale'],
+                    'transform' : ['transform'] },
                 true );
             break;
         default:

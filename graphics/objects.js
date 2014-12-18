@@ -12,7 +12,7 @@ SpriteBubbleMorph.prototype.dataAsMorph = function (data) {
         }
         return contents;
 }
-
+;
 // CellMorph.prototype.drawNew override, because proxying is WAY too convoluted
 // Done for displaying associations
 CellMorph.prototype.drawNew = function () {
@@ -20,8 +20,8 @@ CellMorph.prototype.drawNew = function () {
         txt,
         img,
         fontSize = SyntaxElementMorph.prototype.fontSize,
-        isSameList = this.contentsMorph instanceof ListWatcherMorph
-                && (this.contentsMorph.list === this.contents);
+        isSameList = this.contentsMorph instanceof ListWatcherMorph &&
+                (this.contentsMorph.list === this.contents);
 
     if (this.isBig) {
         fontSize = fontSize * 1.5;
@@ -163,12 +163,12 @@ CellMorph.prototype.drawNew = function () {
 // Definition of a new API Category
 
 SpriteMorph.prototype.categories.push('api');
-SpriteMorph.prototype.blockColor['api'] = new Color(120, 150, 50);
+SpriteMorph.prototype.blockColor.api = new Color(120, 150, 50);
 
 // Definition of a new Graphics Category
 
 SpriteMorph.prototype.categories.push('graphics');
-SpriteMorph.prototype.blockColor['graphics'] = new Color(200, 20, 50);
+SpriteMorph.prototype.blockColor.graphics = new Color(200, 20, 50);
 
 // Block specs
 
@@ -178,8 +178,8 @@ SpriteMorph.prototype.initBlocks = function() {
     this.originalInitBlocks();
 
     // Control
-    this.blocks.doForEach.spec = 'for each %upvar in %l %cs',
-    this.blocks.doForEach.defaults = [localize('item')]
+    this.blocks.doForEach.spec = 'for each %upvar in %l %cs';
+    this.blocks.doForEach.defaults = [localize('item')];
     this.blocks.doForEach.dev = 'false';
 
     // Graphics Blocks
@@ -254,7 +254,17 @@ SpriteMorph.prototype.initBlocks = function() {
         spec: 'report %filter of size %n'
     };
 
+    this.blocks.reportConv = {
+        type: 'reporter',
+        category: 'graphics',
+        spec: 'convolve data %l with matrix %l'
+    };
     
+    this.blocks.applyFilter = {
+        type: 'reporter',
+        category: 'graphics',
+        spec: 'apply %filter2 to %cst with with inputs %l'
+    };
     
     // API
     this.blocks.jsonObject = {
@@ -292,7 +302,7 @@ SpriteMorph.prototype.initBlocks = function() {
         spec: 'proxied %method at %protocol %s with parameters %mult%s',
         defaults: ['GET', 'http://', null, null]
     };
-}
+};
 
 SpriteMorph.prototype.initBlocks();
 
@@ -331,8 +341,9 @@ var blockTemplates = function(category) {
         blocks.push('-');
         blocks.push('-');
         blocks.push(blockBySelector('reportFilter'));
-        
-    
+        blocks.push('-');
+        blocks.push(blockBySelector('reportConv'));
+        blocks.push(blockBySelector('applyFilter'));
     }
 
     if (category === 'api') {
@@ -535,14 +546,100 @@ SpriteMorph.prototype.setPixelXYOfCostume = function(x, y, costumeName, data) {
 StageMorph.prototype.setPixelXYOfCostume =
     SpriteMorph.prototype.setPixelXYOfCostume;
     
+function convertPixelsToList(px, width, height) {
+    var result = new List();
+    var x = 0, y = 0, i, row;
+    for (; y < height; y += 1) {
+        row = new List();
+        for (x = 0; x < width; x += 1) {
+            i = coorToLoc(x, y, width);
+            row.add(pixelList(px[i], px[i + 1], px[i + 2], px[i + 3]));
+        }
+        result.add(row);
+    }
+
+    return result;
+}
+
+function canvasFromList(data) {
+    var height  = data.length();
+    var width   = data.at(1).length();
+    var canvas  = newCanvas({x: width, y: height});
+    var ctx     = canvas.getContext('2d');
+    var newimagedata = ctx.createImageData(width, height);
+    var pixels  = newimagedata.data;
     
+    var x = 1, y, row;
+    for(; x < data.length(); x += 1) {
+        row = data.at(x);
+        for(y = 1; y < row.length(); y += 1) {
+            loc = coorToLoc(x - 1, y - 1, width);
+            pixels[loc] = data.at(y).at(x).at(1);
+            pixels[loc + 1] = data.at(y).at(x).at(2);
+            pixels[loc + 2] = data.at(y).at(x).at(3);
+            var a = data.at(y).at(x).at(4); // FIXME -- this is HACKY!!!
+            pixels[loc + 3] = a == 1 ? 255 : a;
+        }
+    }
     
+    newimagedata.data.set(pixels); //add transformed pixels
+    ctx.putImageData(newimagedata, 0, 0);
+    
+    return canvas;
+}
+    
+SpriteMorph.prototype.reportConv = function(data, matrix) {
+    var canv = canvasFromList(data);
+    var ctx  = canv.getContext('2d');
+    var px   = ctx.getImageData(0, 0, canv.width, canv.height);
+    // TODO: SERIOUS ERROR HANDLING NEEDED!!!
+    var mat  = [
+        [matrix.at(1).at(1), matrix.at(1).at(2), matrix.at(1).at(3)],
+        [matrix.at(2).at(1), matrix.at(2).at(2), matrix.at(2).at(3)],
+        [matrix.at(3).at(1), matrix.at(3).at(2), matrix.at(3).at(3)],
+    ];
+    
+    var newData = Filters.filterImage(Filters.convolute, px, mat);
+    return convertToPixelList(newData.data, canv.width, canv.height)
+}
+
+StageMorph.prototype.reportConv = SpriteMorph.prototype.reportConv;
+
+
+SpriteMorph.prototype.applyFilter = function(filter, costumeName, list) {
+    
+}
+
+StageMorph.prototype.applyFilter = SpriteMorph.prototype.applyFilter;
+
+
 // Some attempts at a better generic filtering method
 // Idea from HTML5 rocks tutorial on processing images
 Filters = {}
+Filters.getPixels = function(img) {
+    var c = this.getCanvas(img.width, img.height);
+    var ctx = c.getContext('2d');
+    ctx.drawImage(img);
+    return ctx.getImageData(0,0,c.width,c.height);
+};
+
+Filters.getCanvas = function(w,h) {
+    var c = document.createElement('canvas');
+    c.width = w;
+    c.height = h;
+    return c;
+};
+
 // Wrapper function to apply a generic filter.
 Filters.filterImage = function(filter, image, var_args) {
-    var args = [this.getPixels(image)];
+    console.log('FILTER');
+    console.log(image);
+    var args
+    if (image instanceof ImageData) {
+        args = [ image ];
+    } else {
+        args = [this.getPixels(image)];
+    }
     for (var i = 2; i < arguments.length; i += 1) {
         args.push(arguments[i]);
     }
