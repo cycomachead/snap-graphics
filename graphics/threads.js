@@ -4,6 +4,10 @@ Process.prototype.colorFromRGB = function(r, g, b, a) {
         return new Color(r, g, b, a);
 }
 
+Process.prototype.colorFromRGBList = function(l) {
+        return new Color(l.at(1), l.at(2), l.at(3), l.at(4));
+}
+
 Process.prototype.colorFromHSV = function(h,s,v) {
         var color = new Color();
         color.set_hsv(h,s,v);

@@ -201,6 +201,12 @@ SpriteMorph.prototype.initBlocks = function() {
         spec: 'color r: %n g: %n b: %n a: %n',
         defaults: [250, 128, 64, 1]
     };
+    this.blocks.colorFromRGBList = {
+        type: 'reporter',
+        category: 'graphics',
+        spec: 'color %l'
+    };
+    
     this.blocks.colorFromHSV = {
         type: 'reporter',
         category: 'graphics',
@@ -223,11 +229,22 @@ SpriteMorph.prototype.initBlocks = function() {
     this.blocks.getPixelDataForCostume = {
         type: 'reporter',
         category: 'graphics',
-        spec: 'pixel data from costume %cst'
+        spec: 'all pixels from costume %cst'
+    };
+
+    this.blocks.getPixelXYFromCostume = {
+        type: 'reporter',
+        category: 'graphics',
+        spec: 'pixel x: %n y: %n from %cst'
     };
     
-    
-    
+    this.blocks.setPixelXYOfCostume = {
+        type: 'command',
+        category: 'graphics',
+        spec: 'set pixel x: %n y: %n from %cst to %l'
+    };
+
+
 
     // API
     this.blocks.jsonObject = {
@@ -292,10 +309,15 @@ var blockTemplates = function(category) {
         blocks.push(blockBySelector('colorFromPickerAsList'));
         blocks.push(blockBySelector('colorFromPicker'));
         blocks.push(blockBySelector('colorFromRGB'));
+        blocks.push(blockBySelector('colorFromRGBList'));
         blocks.push(blockBySelector('colorFromHSV'));
-        blocks.push(blockBySelector('colorFromString'));
+        // blocks.push(blockBySelector('colorFromString'));
+        blocks.push('-');
         blocks.push(blockBySelector('newCostumeFromData'));
+        blocks.push(blockBySelector('setPixelXYOfCostume'));
+        blocks.push('-');
         blocks.push(blockBySelector('getPixelDataForCostume'));
+        blocks.push(blockBySelector('getPixelXYFromCostume'));
     }
 
     if (category === 'api') {
@@ -329,11 +351,16 @@ StageMorph.prototype.delayedRefresh = function(delay) {
  *  GRAPHICS BLOCKS *
  *****************************************************************************/
 SpriteMorph.prototype.getCostumeIdFromName = function (name) {
+    if (name === 'Turtle') {
+        throw new Error('The Turtle costume currently isn\'t supported.');
+    }
+    
     var costumes = this.costumes; // FIXME: should really call asArray
     for (var i = 1; i <= costumes.length(); i += 1) {
         if (costumes.at(i).name === name) { return i; }
     }
-    return -1;
+    
+    throw new Error('The costume named \'' + name + '\' could not be found.');
 };
 
 /* A list representing a pixel coloring. Eventually this should be a 
@@ -385,18 +412,15 @@ SpriteMorph.prototype.newCostumeFromData = function(costumeName, data) {
             pixels[loc] = data.at(y).at(x).at(1);
             pixels[loc + 1] = data.at(y).at(x).at(2);
             pixels[loc + 2] = data.at(y).at(x).at(3);
-            pixels[loc + 3] = data.at(y).at(x).at(4);
+            var a = data.at(y).at(x).at(4); // FIXME -- this is HACKY!!!
+            pixels[loc + 3] = a == 1 ? 255 : a;
         }
     }
-    
-    console.log(x);
-    console.log(y);
-    console.log(pixels.length);
     
     newimagedata.data.set(pixels); //add transformed pixels
     ctx.putImageData(newimagedata, 0, 0);
     
-    this.addCostume(costume)
+    this.addCostume(costume);
 }
 
 StageMorph.prototype.newCostumeFromData =
@@ -406,18 +430,9 @@ StageMorph.prototype.newCostumeFromData =
     because Snap! lists are 64bit arrays. In the future there should be a more
     efficient way of representing data because this is an 8x waste in memory.*/
 SpriteMorph.prototype.getPixelDataForCostume = function(costumeName) {
-    // var costume, canvas, ctx, imagedata, px, result, row, id;
+    var costume, canvas, ctx, imagedata, px, result, row, id;
     
-    if (costumeName === 'Turtle') {
-    throw new Error('The Turtle costume currently isn\'t supported.');
-    }
-    
-    id = this.getCostumeIdFromName(costumeName);
-    if (id === -1) {
-        throw new Error('The costume named \'' + costumeName +
-            '\' could not be found.');
-    }
-    
+    id        = this.getCostumeIdFromName(costumeName);
     costume   = this.costumes.at(id);
     canvas    = costume.contents;
     ctx       = canvas.getContext("2d");
@@ -440,3 +455,66 @@ SpriteMorph.prototype.getPixelDataForCostume = function(costumeName) {
 
 StageMorph.prototype.getPixelDataForCostume =
     SpriteMorph.prototype.getPixelDataForCostume;
+
+
+SpriteMorph.prototype.getPixelXYFromCostume = function(x, y, costumeName) {
+    var costume, canvas, ctx, imagedata, px, id;
+
+    id        = this.getCostumeIdFromName(costumeName);
+    costume   = this.costumes.at(id);
+    canvas    = costume.contents;
+    ctx       = canvas.getContext("2d");
+    // TODO: Optimize this to return just a single pixel. TEST
+    // ctx.getImageData(x + 1, y + 1, x + 2, y + 2);
+    imagedata = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    px        = imagedata.data;
+
+    // FUTURE: Enable different methods like reflections for interpolations
+    if (x > canvas.width || x <= 0 || y > canvas.height || y <= 0) {
+        return new List();
+    }
+    
+    var i = coorToLoc(x - 1, y - 1, canvas.width);
+
+    return pixelList(px[i], px[i + 1], px[i + 2], px[i + 3]);
+}
+
+StageMorph.prototype.getPixelXYFromCostume =
+    SpriteMorph.prototype.getPixelXYFromCostume;
+    
+
+SpriteMorph.prototype.setPixelXYOfCostume = function(x, y, costumeName, data) {
+    if (!(data instanceof List)) {
+        throw new Error('Input data must be a proper Snap! list.');
+    }
+
+    var id      = this.getCostumeIdFromName(costumeName);
+    var costume = this.costumes.at(id);
+    var canvas  = costume.contents;
+    
+    if (x > canvas.width || x <= 0 || y > canvas.height || y <= 0) {
+        return; // TODO: Fail silently or throw error?
+    }
+    
+    var ctx     = canvas.getContext('2d');
+    var newimagedata = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    var pixels  = newimagedata.data;
+
+    var i = coorToLoc(x - 1, y - 1, canvas.width);
+
+    pixels[i]     = data.at(1);
+    pixels[i + 1] = data.at(2);
+    pixels[i + 2] = data.at(3);
+    pixels[i + 3] = data.at(4) == 1 ? 255 : data.at(4); // FIXME -- HACKY!
+
+    newimagedata.data.set(pixels); //add transformed pixels
+    ctx.putImageData(newimagedata, 0, 0);
+    
+    // Re-draw ourselves if we are wearing the costume being edited.
+    if (this.costume.name === costumeName) {
+        this.drawNew();
+    }
+}
+
+StageMorph.prototype.setPixelXYOfCostume =
+    SpriteMorph.prototype.setPixelXYOfCostume;
