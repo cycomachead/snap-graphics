@@ -2386,3 +2386,30 @@ ______
 141205
 ------
 * Morphic: Avoid auto-scaling artefacts in Safari on retina displays (resulting in “traces” when dragging items)
+
+141206
+------
+* Store: Fixed #668
+
+141211
+------
+* Threads: yield after each cycle in the experimental “forEach” primitive
+
+141215
+------
+* New Swedish translation! Yay!! Thanks, Erik A Olsson!
+
+141217
+------
+* Objects, Store: Experimental “processes” count watcher (hidden in dev mode)
+* Threads: Remove terminated processes from expired clones
+* Threads: Let “zombifying” scripts access receivers’ local vars
+
+150112
+------
+* Cloud, GUI: Backend load balancing support, eliminate now obsolete authentication roundtrip, Cloud error message tweaks
+* Store: notify users of potential incompatibilities when opening projects created in other forks (e.g. BeetleBlocks)
+* Threads: Don’t highlight scripts running inside clones (boosts performance), Thanks, @aranlunzer, for the hint!
+* Objects: Disable clones from being edited via their context menus or double-click
+* Italian translation update, thanks, Alberto Firpo!
+* GUI: add additional yields to nextSteps() (work around a bug in Chrome)
