@@ -36,7 +36,7 @@ modules.cloud = '2015-January-12';
 
 var Cloud;
 var SnapCloud = new Cloud(
-    'https://snap.apps.miosoft.com/SnapCloud'
+    'http://ucbsnap.herokuapp.com'
 );
 
 // Cloud /////////////////////////////////////////////////////////////
@@ -44,12 +44,17 @@ var SnapCloud = new Cloud(
 function Cloud(url) {
     this.username = null;
     this.password = null; // hex_sha512 hashed
-    this.url = url;
+    this.url = url + (url[url.length - 1] == '/' ? '' : '/') + this.API_BASE;
     this.session = null;
     this.limo = null;
     this.route = null;
-    this.api = {};
+    this.api = {
+        
+    };
+    
 }
+
+Cloud.prototype.API_BASE = 'api/';
 
 Cloud.prototype.clear = function () {
     this.username = null;
@@ -64,19 +69,6 @@ Cloud.prototype.hasProtocol = function () {
     return this.url.toLowerCase().indexOf('http') === 0;
 };
 
-Cloud.prototype.setRoute = function (username) {
-    var routes = 10,
-        userNum = 0,
-        i;
-
-    for (i = 0; i < username.length; i += 1) {
-        userNum += username.charCodeAt(i);
-    }
-    userNum = userNum % routes + 1;
-    this.route = '.sc1m' +
-        (userNum < 10 ? '0' : '') +
-        userNum;
-};
 
 // Cloud: Snap! API
 
@@ -446,20 +438,13 @@ Cloud.prototype.callURL = function (url, callBack, errorCall) {
         myself = this;
     try {
         // set the Limo. Also set the glue as a query paramter for backup.
-        stickyUrl = url +
-            '&SESSIONGLUE=' +
-            this.route +
-            '&_Limo=' +
-            this.limo;
+        stickyUrl = url;
         request.open('GET', stickyUrl, true);
         request.withCredentials = true;
         request.setRequestHeader(
             "Content-Type",
             "application/x-www-form-urlencoded"
         );
-        request.setRequestHeader('MioCracker', this.session);
-        // Set the glue as a request header.
-        request.setRequestHeader('SESSIONGLUE', this.route);
         request.onreadystatechange = function () {
             if (request.readyState === 4) {
                 if (request.responseText) {
@@ -514,21 +499,13 @@ Cloud.prototype.callService = function (
         });
     }
     try {
-        stickyUrl = this.url +
-            '/' +
-            service.url +
-            '&SESSIONGLUE=' +
-            this.route +
-            '&_Limo=' +
-            this.limo;
+        stickyUrl = this.url;
         request.open(service.method, stickyUrl, true);
         request.withCredentials = true;
         request.setRequestHeader(
             "Content-Type",
             "application/x-www-form-urlencoded"
         );
-        request.setRequestHeader('MioCracker', this.session);
-        request.setRequestHeader('SESSIONGLUE', this.route);
         request.onreadystatechange = function () {
             if (request.readyState === 4) {
                 var responseList = [];

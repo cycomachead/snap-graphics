@@ -4179,9 +4179,11 @@ IDE_Morph.prototype.setCloudURL = function () {
         SnapCloud.url,
         this.world(),
         null,
-        {
-            'Snap!Cloud' :
-                'https://snap.apps.miosoft.com/SnapCloud'
+        { // FIXME -- this should be specified in Cloud.js?
+            'Default Heroku' :
+                'http://ucbsnap.herokuapp.com',
+            'Rails Localhost' :
+                'http://localhost:3000',
         }
     );
 };
