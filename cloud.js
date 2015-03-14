@@ -243,7 +243,7 @@ Cloud.prototype.login = function (
     try {
         request.open(
             "POST",
-            this.url
+            this.url,
             true
         );
         request.setRequestHeader(
