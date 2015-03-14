@@ -30,7 +30,7 @@
 /*global modules, IDE_Morph, SnapSerializer, hex_sha512, alert, nop,
 localize*/
 
-modules.cloud = '2015-January-12';
+modules.cloud = '2015-March-13';
 
 // Global stuff
 
@@ -48,10 +48,11 @@ function Cloud(url) {
     this.session = null;
     this.limo = null;
     this.route = null;
+    this.userID = null;
     this.api = {
-        
+
     };
-    
+
 }
 
 Cloud.prototype.API_BASE = 'api/';
@@ -84,17 +85,12 @@ Cloud.prototype.signup = function (
     try {
         request.open(
             "GET",
-            (this.hasProtocol() ? '' : 'http://')
-                + this.url + 'SignUp'
-                + '?Username='
-                + encodeURIComponent(username)
-                + '&Email='
-                + encodeURIComponent(email),
+            this.url + 'users/signup',
             true
         );
         request.setRequestHeader(
             "Content-Type",
-            "application/x-www-form-urlencoded"
+            "application/json"
         );
         request.withCredentials = true;
         request.onreadystatechange = function () {
@@ -116,7 +112,7 @@ Cloud.prototype.signup = function (
                 } else {
                     errorCall.call(
                         null,
-                        myself.url + 'SignUp',
+                        myself.url + 'users/signup',
                         localize('could not connect to:')
                     );
                 }
@@ -124,7 +120,7 @@ Cloud.prototype.signup = function (
         };
         request.send(null);
     } catch (err) {
-        errorCall.call(this, err.toString(), 'Snap!Cloud');
+        errorCall.call(this, err.toString(), 'snap cloud');
     }
 };
 
@@ -142,10 +138,7 @@ Cloud.prototype.getPublicProject = function (
     try {
         request.open(
             "GET",
-            (this.hasProtocol() ? '' : 'http://')
-                + this.url + 'Public'
-                + '?'
-                + id,
+            this.url + 'projects/' + id,
             true
         );
         request.setRequestHeader(
@@ -196,8 +189,7 @@ Cloud.prototype.resetPassword = function (
     try {
         request.open(
             "GET",
-            (this.hasProtocol() ? '' : 'http://')
-                + this.url + 'ResetPW'
+            this.url + 'users/FIXME'
                 + '?Username='
                 + encodeURIComponent(username),
             true
@@ -248,14 +240,10 @@ Cloud.prototype.login = function (
     var request = new XMLHttpRequest(),
         usr = JSON.stringify({'__h': password, '__u': username}),
         myself = this;
-    this.setRoute(username);
     try {
         request.open(
             "POST",
-            (this.hasProtocol() ? '' : 'http://') +
-                this.url +
-                '?SESSIONGLUE=' +
-                this.route,
+            this.url
             true
         );
         request.setRequestHeader(
@@ -263,20 +251,14 @@ Cloud.prototype.login = function (
             "application/json; charset=utf-8"
         );
         // glue this session to a route:
-        request.setRequestHeader('SESSIONGLUE', this.route);
         request.withCredentials = true;
         request.onreadystatechange = function () {
             if (request.readyState === 4) {
                 if (request.responseText) {
                     myself.api = myself.parseAPI(request.responseText);
-                    myself.session = request.getResponseHeader('MioCracker')
-                        .split(';')[0];
+                    myself.session = '';
                     // set the cookie identifier:
-                    myself.limo = this.getResponseHeader("miocracker")
-                        .substring(
-                            9,
-                            this.getResponseHeader("miocracker").indexOf("=")
-                        );
+                    myself.limo = '';
                     if (myself.api.logout) {
                         myself.username = username;
                         myself.password = password;
@@ -405,6 +387,7 @@ Cloud.prototype.changePassword = function (
                     myself.disconnect();
                 },
                 errorCall,
+                // FIXME
                 [hex_sha512(oldPW), hex_sha512(newPW)]
             );
         },
@@ -467,15 +450,25 @@ Cloud.prototype.callURL = function (url, callBack, errorCall) {
     }
 };
 
+// FIXME == until things are refactored this will do most of the work.
 Cloud.prototype.callService = function (
     serviceName,
     callBack,
     errorCall,
     args
 ) {
+    // Map snap internal names to API endpoints
+    // ('api/' is already added)
+    var serviceOpts = {
+        'login':'users/login',
+        'logout':'users/logout',
+        'signup':'users/signup',
+        'sharePublicProject':'', // I think
+        'getProjectList':'' // I think
+    };
     // both callBack and errorCall are optional two-argument functions
     var request = new XMLHttpRequest(),
-        service = this.api[serviceName],
+        service = serviceOps[serviceName],
         myself = this,
         stickyUrl,
         postDict;
