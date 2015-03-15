@@ -250,7 +250,6 @@ Cloud.prototype.login = function (
             "Content-Type",
             "application/json; charset=utf-8"
         );
-        // glue this session to a route:
         request.withCredentials = true;
         request.onreadystatechange = function () {
             if (request.readyState === 4) {
